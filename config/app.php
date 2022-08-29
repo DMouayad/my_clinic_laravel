@@ -1,5 +1,6 @@
 <?php
 
+use App\Providers\StaffEmailServiceProvider;
 use Illuminate\Support\Facades\Facade;
 
 return [
@@ -195,6 +196,7 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
 
+        StaffEmailServiceProvider::class,
     ],
 
     /*
