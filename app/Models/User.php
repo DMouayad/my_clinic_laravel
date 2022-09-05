@@ -52,4 +52,20 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->belongsTo(Role::class, 'role_id', 'id');
     }
+
+    public function staffEmail()
+    {
+        return $this->hasOneThrough(
+            StaffEmail::class,
+            StaffEmailUser::class,
+            'user_id',
+            'id',
+            'id',
+            'staff_email_id'
+        );
+    }
+    public function sendEmailVerificationNotification()
+    {
+        $this->notify(new SendQueuedEmailVerificationNotification());
+    }
 }
