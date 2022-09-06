@@ -29,7 +29,7 @@ class UsersSeeder extends Seeder
 
 
         $admin = User::create([
-            'email' => $this->users_emails['admin'],
+            'email' => $this->users_seeding_emails['admin'],
             'password' => Hash::make($this->default_password),
             'name' => 'admin1',
             'role_id' => Role::getIdBySlug('admin'),
@@ -40,14 +40,14 @@ class UsersSeeder extends Seeder
             'staff_email_id' => StaffEmail::whereEmail($admin->email)->first()->id,
         ]);
         User::create([
-            'email' => $this->users_emails['dentist'],
+            'email' => $this->users_seeding_emails['dentist'],
             'password' => Hash::make($this->default_password),
             'name' => 'dentist1',
             'role_id' => Role::getIdBySlug('dentist'),
         ]);
 
         User::create([
-            'email' => $this->users_emails['secretary'],
+            'email' => $this->users_seeding_emails['secretary'],
             'password' => Hash::make($this->default_password),
             'name' => 'secretary1',
             'role_id' => Role::getIdBySlug('secretary'),

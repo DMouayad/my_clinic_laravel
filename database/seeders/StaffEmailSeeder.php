@@ -18,7 +18,7 @@ class StaffEmailSeeder extends Seeder
      */
     public function run()
     {
-        foreach ($this->users_emails as $role_slug => $email_address) {
+        foreach ($this->users_seeding_emails as $role_slug => $email_address) {
             StaffEmail::create(
                 [
                     'email' => $email_address,
