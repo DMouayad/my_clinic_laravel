@@ -91,16 +91,20 @@ class StaffEmailController extends Controller
         ]);
 
         if (!empty($params)) {
-            $updated =  $this->staffEmailService->update(
-                strtolower(Arr::get($params, 'email')),
-                strtolower(Arr::get($params, 'role')),
+            $updated_staff_email =  $this->staffEmailService->update(
                 $staffEmail,
-                $userService
+                strtolower(Arr::get($params, 'email', default: null)),
+                strtolower(Arr::get($params, 'role', default: null)),
             );
-            if ($updated) {
+            $updated_user = $userService->update(
+                $updated_staff_email->user,
+                $updated_staff_email->email,
+                $updated_staff_email->role_id
+            );
+
+            $user_was_updated = $updated_staff_email->user ==  $updated_user;
+            if ($user_was_updated) {
                 return $this->successResponse();
-            } else {
-                return $this->errorResponse();
             }
         }
     }

@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Exceptions\DeletingOnlyAdminStaffEmailException;
 use App\Models\Role;
 use App\Models\StaffEmail;
-use App\Services\UserService;
 use App\Exceptions\StaffEmailAlreadyExistsException;
 
 class StaffEmailService
@@ -53,38 +52,30 @@ class StaffEmailService
     /**
      * Update the specified staff_email.
      *
+     * @param  \App\Models\StaffEmail  $staff_email
      * @param  string|null  $email
      * @param  string|null $role_slug
-     * @param  \App\Models\StaffEmail  $staff_email
-     * @return bool
+     * @return StaffEmail
      * @throws \App\Exceptions\RoleNotFoundException|\App\Exceptions\StaffEmailAlreadyExistsException
      */
     public function update(
-        string|null  $email,
-        string|null $role_slug,
         StaffEmail $staff_email,
-        UserService $userService,
-    ): bool {
-        if ($staff_email->email != $email) {
+        string|null  $email,
+        string|null $role_slug
+    ): StaffEmail {
+        // if not the same email was provided check if it already exists in the db
+        if ($email && $staff_email->email != $email) {
             $this->checkIfStaffEmailExists($email);
-        }
-
-        if ($email) {
             $staff_email->email = $email;
         }
         if ($role_slug) {
             $staff_email->role_id = Role::getIdBySlug($role_slug);
         }
         if ($staff_email->isDirty()) {
-            $updated = $staff_email->save();
-
-            $updated_user = $userService->update(
-                $staff_email->user,
-                ['email' => $staff_email->email, 'role_id' => $staff_email->role_id]
-            );
-            return $updated && $staff_email->user ==  $updated_user;
+            $staff_email->save();
+            return $staff_email->fresh();
         }
-        return true;
+        return $staff_email;
     }
 
     /**

@@ -11,6 +11,7 @@ use \Illuminate\Support\Facades\Hash;
 use \Illuminate\Support\Facades\Validator;
 use App\Models\StaffEmailUser;
 use App\Exceptions\UnauthorizedToDeleteUserException;
+use App\Exceptions\UserDoesntMatchHisStaffEmailException;
 
 class UserService
 {
@@ -76,30 +77,30 @@ class UserService
 
     /**
      * @param User $user
-     * @param array $data
+     * @param int|null $role_id
+     * @param string|null $email
      * @return \App\Models\User
-     * @throws \App\Exceptions\EmailAlreadyRegisteredException
+     * @throws EmailAlreadyRegisteredException|UserDoesntMatchHisStaffEmailException
      */
-    public function update(User $user, array $data): User
+    public function update(User $user, int|null $role_id = null, string|null $email = null): User
     {
-        $validated_data =  Validator::make($data, [
-            'email' => 'nullable|email',
-            'role_id' => 'nullable|integer',
-            'email_verified_at' => 'nullable',
-        ])->validate();
-
-        $user = $this->setModelAttributes($user, $validated_data);
+        if ($email && $user->email != $email) {
+            $this->checkEmailAlreadyRegistered($email);
+            $user->email = $email;
+        }
+        if ($role_id) {
+            $user->role_id = $role_id;
+        }
+        $this->verifyUserMatchHisStaffEmail($user);
         return $this->performUpdate($user);
     }
 
     /**
      * @param \App\Models\User $user
      * @return \App\Models\User
-     * @throws \App\Exceptions\EmailAlreadyRegisteredException
      */
     private function performUpdate(User $user): User
     {
-        $this->checkEmailAlreadyRegistered($user->email);
         if ($user->isDirty(['role_id', 'email'])) {
             $user->tokens()->delete();
         }
@@ -107,11 +108,9 @@ class UserService
             $user->email_verified_at = null;
         }
         $user->save();
-
         return $user;
     }
     /**
-     * 
      * @param string $email
      * @return void
      * @throws \App\Exceptions\EmailAlreadyRegisteredException
@@ -120,6 +119,21 @@ class UserService
     {
         if (User::whereEmail($email)->count() != 0) {
             throw new EmailAlreadyRegisteredException($email);
+        }
+    }
+    /**
+     *
+     * @param \App\Models\User $user
+     * @param integer $new_role_id
+     * @return void
+     * @throws UserDoesntMatchHisStaffEmailException
+     */
+    private function verifyUserMatchHisStaffEmail(User $user)
+    {
+        $has_same_role_id = $user->staffEmail()->get(['role_id'])->first()->role_id == $user->role_id;;
+        $has_same_email = $user->staffEmail()->get(['email'])->first()->email == $user->email;
+        if (!($has_same_email && $has_same_role_id)) {
+            throw new UserDoesntMatchHisStaffEmailException($user);
         }
     }
 }
