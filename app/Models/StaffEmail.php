@@ -19,6 +19,9 @@ class StaffEmail extends Model
     {
         return $this->belongsTo(Role::class, 'role_id');
     }
+    public function roleSlug():string{
+        return $this->role()->get('slug')->first()->slug;
+    }
     /**
      * get the user which have registered using the same email address.
      */

@@ -53,6 +53,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->belongsTo(Role::class, 'role_id', 'id');
     }
 
+    public function roleSlug(): string
+    {
+        return $this->role()->get('slug')->first()->slug;
+    }
+
     public function staffEmail()
     {
         return $this->hasOneThrough(
