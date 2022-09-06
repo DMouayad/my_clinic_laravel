@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
-use App\Exceptions\DeletingOnlyAdminStaffEmailException;
 use App\Models\Role;
 use App\Models\StaffEmail;
+use App\Exceptions\DeletingOnlyAdminStaffEmailException;
 use App\Exceptions\StaffEmailAlreadyExistsException;
 
 class StaffEmailService
@@ -23,7 +23,6 @@ class StaffEmailService
 
     /**
      * Check if the passed email address already exists in the database.
-     *
      * @param string $email
      * @return void
      * @throws \App\Exceptions\StaffEmailAlreadyExistsException
@@ -37,7 +36,6 @@ class StaffEmailService
     /**
      * Creates new StaffEmail with provided params.
      * returns JsonResponse of the creation process.
-     *
      * @param string $email
      * @param string $role_slug
      * @return \App\Models\StaffEmail
@@ -60,8 +58,8 @@ class StaffEmailService
      */
     public function update(
         StaffEmail $staff_email,
-        string|null  $email,
-        string|null $role_slug
+        string|null  $email=null,
+        string|null $role_slug =null
     ): StaffEmail {
         // if not the same email was provided check if it already exists in the db
         if ($email && $staff_email->email != $email) {
@@ -73,7 +71,7 @@ class StaffEmailService
         }
         if ($staff_email->isDirty()) {
             $staff_email->save();
-            return $staff_email->fresh();
+            return $staff_email;
         }
         return $staff_email;
     }
