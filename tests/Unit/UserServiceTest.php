@@ -3,8 +3,6 @@
 namespace Tests\Unit;
 
 
-use Illuminate\Http\JsonResponse;
-
 use App\Exceptions\EmailAlreadyRegisteredException;
 use App\Exceptions\UnauthorizedToDeleteUserException;
 use App\Exceptions\UserDoesntMatchHisStaffEmailException;
@@ -21,51 +19,39 @@ use Tests\Utils\Traits\ProvidesUsersForTesting;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     *
-     * @return void
-     */
     public function run()
     {
-        $this->call([
-            RoleSeeder::class,
-            StaffEmailSeeder::class,
-        ]);
+        $this->call([RoleSeeder::class,  StaffEmailSeeder::class]);
     }
 }
 
 class UserServiceTest extends TestCase
 {
-
-
     use  RefreshDatabase, ProvidesUsersForTesting;
 
     private UserService $userService;
-
     protected $seed = true;
-    /**
-     * A basic unit test example.
-     *
-     * @return void
-     */
     protected $seeder = DatabaseSeeder::class;
+
     protected function setUp(): void
     {
         $this->userService = new UserService();
         parent::setUp();
     }
+    private $valid_user_credentials = [
+        'email' => 'admin@myclinic.com',
+        'name' => 'admin1',
+        'password' => 'clinic123',
+    ];
 
     public function test_user_creation_with_valid_credentials()
     {
-        $response =   $this->userService->createNewUser(
+        $user =  $this->userService->createNewUser(
             $this->valid_user_credentials['email'],
             $this->valid_user_credentials['name'],
             $this->valid_user_credentials['password']
         );
-        var_dump($response->content());
-        $this->asset;
-        $this->assertEquals($response->status(), JsonResponse::HTTP_CREATED);
+        $this->assertModelExists($user);
     }
 
     public function test_create_user_with_valid_credentials()
@@ -86,14 +72,14 @@ class UserServiceTest extends TestCase
     {
         $this->assertThrows(function () {
             $this->userService->createNewUser(
-                $this->valid_admin_credentials['email'],
-                $this->valid_admin_credentials['name'],
-                $this->valid_admin_credentials['password']
+                $this->valid_user_credentials['email'],
+                $this->valid_user_credentials['name'],
+                $this->valid_user_credentials['password']
             );
             $this->userService->createNewUser(
-                $this->valid_admin_credentials['email'],
-                $this->valid_admin_credentials['name'],
-                $this->valid_admin_credentials['password']
+                $this->valid_user_credentials['email'],
+                $this->valid_user_credentials['name'],
+                $this->valid_user_credentials['password']
             );
         }, EmailAlreadyRegisteredException::class);
     }
@@ -185,9 +171,10 @@ class UserServiceTest extends TestCase
     public function test_admin_can_delete_other_users()
     {
         $admin = $this->createAdminUser(grant_token: true);
-
         $user = $this->createSecretaryUser();
+
         $this->userService->deleteUser($user, $admin);
+        // expect $user to be deleted from db
         $this->assertModelMissing($user);
     }
 
@@ -196,6 +183,5 @@ class UserServiceTest extends TestCase
         $user = $this->createDentistUser(store_token: true);
         $this->userService->deleteUser($user, $user);
         $this->assertDatabaseMissing('personal_access_tokens', ['tokenable_id' => $user->id]);
-
     }
 }
