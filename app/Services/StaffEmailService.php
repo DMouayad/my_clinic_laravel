@@ -2,10 +2,10 @@
 
 namespace App\Services;
 
-use App\Models\Role;
-use App\Models\StaffEmail;
 use App\Exceptions\DeletingOnlyAdminStaffEmailException;
 use App\Exceptions\StaffEmailAlreadyExistsException;
+use App\Models\Role;
+use App\Models\StaffEmail;
 
 class StaffEmailService
 {
@@ -13,7 +13,8 @@ class StaffEmailService
      * @param string $email
      * @param string $role_slug
      * @return \App\Models\StaffEmail
-     * @throws \App\Exceptions\StaffEmailAlreadyExistsException|\App\Exceptions\RoleNotFoundException
+     * @throws \App\Exceptions\StaffEmailAlreadyExistsException
+     * @throws \App\Exceptions\RoleNotFoundException
      */
     public function store(string $email, string $role_slug): StaffEmail
     {
@@ -33,6 +34,7 @@ class StaffEmailService
             throw new StaffEmailAlreadyExistsException($email);
         }
     }
+
     /**
      * Creates new StaffEmail with provided params.
      * returns JsonResponse of the creation process.
@@ -41,27 +43,31 @@ class StaffEmailService
      * @return \App\Models\StaffEmail
      * @throws \App\Exceptions\RoleNotFoundException
      */
-    private function createStaffEmail(string $email, string $role_slug): StaffEmail
-    {
+    private function createStaffEmail(
+        string $email,
+        string $role_slug
+    ): StaffEmail {
         $role_id = Role::getIdBySlug($role_slug);
-        return StaffEmail::create(['email' => $email, 'role_id' => $role_id,]);
+        return StaffEmail::create(["email" => $email, "role_id" => $role_id]);
     }
 
     /**
      * Update the specified staff_email.
      *
-     * @param  \App\Models\StaffEmail  $staff_email
-     * @param  string|null  $email
-     * @param  string|null $role_slug
+     * @param \App\Models\StaffEmail $staff_email
+     * @param string|null $email
+     * @param string|null $role_slug
      * @return StaffEmail
-     * @throws \App\Exceptions\RoleNotFoundException|\App\Exceptions\StaffEmailAlreadyExistsException
+     * @throws \App\Exceptions\RoleNotFoundException
+     * @throws \App\Exceptions\StaffEmailAlreadyExistsException
      */
     public function update(
         StaffEmail $staff_email,
-        string|null  $email=null,
-        string|null $role_slug =null
+        string|null $email = null,
+        string|null $role_slug = null
     ): StaffEmail {
         // if not the same email was provided check if it already exists in the db
+        // and if no exception was thrown => update current email
         if ($email && $staff_email->email != $email) {
             $this->checkIfStaffEmailExists($email);
             $staff_email->email = $email;
@@ -87,6 +93,7 @@ class StaffEmailService
         $this->checkCanBeDeletedIfAdmin($staff_email);
         return $this->performDelete($staff_email);
     }
+
     /**
      * Check if staff_email can be deleted in case of an Admin's staffEmail
      *
@@ -96,10 +103,12 @@ class StaffEmailService
      */
     private function checkCanBeDeletedIfAdmin(StaffEmail $staff_email): void
     {
-        $admin_role_id = Role::getIdBySlug('admin');
+        $admin_role_id = Role::getIdBySlug("admin");
         if ($staff_email->role_id == $admin_role_id) {
-
-            $numberOfAdminEmails = StaffEmail::where('role_id', $admin_role_id)->count();
+            $numberOfAdminEmails = StaffEmail::where(
+                "role_id",
+                $admin_role_id
+            )->count();
             if ($numberOfAdminEmails == 1) {
                 throw new DeletingOnlyAdminStaffEmailException();
             }
@@ -115,8 +124,8 @@ class StaffEmailService
     {
         // NOTE:
         // Deleting the user before deleting the staffEmail is IMPORTANT due to:
-        // - having onDeleteCascade constraints on the 'staff_email_user' table 
-        // which deletes the relationship between the user and staffEmail 
+        // - having onDeleteCascade constraints on the 'staff_email_user' table
+        // which deletes the relationship between the user and staffEmail
         $staff_email->user()->delete();
         return $staff_email->delete();
     }

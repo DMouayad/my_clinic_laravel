@@ -2,23 +2,22 @@
 
 namespace App\Exceptions;
 
-use Illuminate\Http\JsonResponse;
-use App\Exceptions\CustomException;
+use Symfony\Component\HttpFoundation\Response;
 
 class UnauthorizedToDeleteUserException extends CustomException
 {
     /**
      * Render the exception into an HTTP response.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function render($request)
     {
         return $this->errorResponseFromException(
             $this,
-            'Email address (' .  $this->email . ') already exists!',
-            JsonResponse::HTTP_UNAUTHORIZED
+            "Unauthorized to delete this user",
+            Response::HTTP_FORBIDDEN
         );
     }
 }

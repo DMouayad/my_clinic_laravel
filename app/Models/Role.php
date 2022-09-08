@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
+use App\Exceptions\RoleNotFoundException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use App\Exceptions\RoleNotFoundException;
 
 class Role extends Model
 {
@@ -16,15 +16,10 @@ class Role extends Model
     ];
 
     protected $hidden = [
+        'id',
         'created_at',
         'updated_at',
     ];
-
-    public function users()
-    {
-        return $this->hasMany(User::class);
-    }
-
 
     /**
      * Get Role by role slug.
@@ -35,6 +30,7 @@ class Role extends Model
     {
         return self::firstWhere('slug', $slug);
     }
+
     /**
      * Get Role ID by role slug.
      * @param string $slug
@@ -48,5 +44,10 @@ class Role extends Model
         } catch (ModelNotFoundException $e) {
             throw new RoleNotFoundException($slug);
         }
+    }
+
+    public function users()
+    {
+        return $this->hasMany(User::class);
     }
 }

@@ -39,13 +39,10 @@ class VerificationController extends Controller
         $this->middleware('throttle:6,1')->only('verify', 'resend');
     }
     /**
-
      * Mark the authenticated user’s email address as verified.
-     *
      * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
-
     public function verify(Request $request)
     {
         $user = User::find($request->route('id'));
@@ -69,17 +66,10 @@ class VerificationController extends Controller
     }
 
     /**
-
      * Resend the email verification notification.
-
-     *
-
      * @param \Illuminate\Http\Request $request
-
-     * @return \Illuminate\Http\Response
-
+     * @return \Illuminate\Http\JsonResponse
      */
-
     public function resend(Request $request)
     {
         if ($request->user()->hasVerifiedEmail()) {

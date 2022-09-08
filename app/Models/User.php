@@ -55,7 +55,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function roleSlug(): string
     {
-        return $this->role()->get('slug')->first()->slug;
+        return $this->role()->get(['slug'])->first()->slug;
     }
 
     public function staffEmail()
