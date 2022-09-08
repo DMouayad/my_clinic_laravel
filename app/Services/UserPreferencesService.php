@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Exceptions\UserNotFoundException;
 use App\Models\User;
 use App\Models\UserPreferences;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 
 
@@ -18,7 +19,9 @@ class UserPreferencesService
      */
     private function checkUserExists(int $user_id)
     {
-        if (User::find($user_id)->exists()) {
+        try {
+            User::findOrFail($user_id);
+        } catch (ModelNotFoundException $e) {
             throw new UserNotFoundException($user_id);
         }
     }
