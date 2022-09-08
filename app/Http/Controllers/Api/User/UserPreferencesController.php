@@ -26,7 +26,7 @@ class UserPreferencesController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request)
     {
@@ -92,7 +92,7 @@ class UserPreferencesController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  \App\Models\UserPreferences  $userPreferences
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(UserPreferences $userPreferences)
     {
