@@ -3,19 +3,20 @@
 namespace Database\Seeders;
 
 use App\Models\Role;
-use App\Models\User;
 use App\Models\StaffEmail;
 use App\Models\StaffEmailUser;
+use App\Models\User;
+use Database\Seeders\Utils\ProvidesUserSeedingData;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
-use Database\Seeders\Utils\ProvidesUserSeedingData;
 
 
 class UsersSeeder extends Seeder
 {
     use ProvidesUserSeedingData;
+
     /**
      * Run the database seeds.
      *
@@ -35,23 +36,33 @@ class UsersSeeder extends Seeder
             'role_id' => Role::getIdBySlug('admin'),
             'email_verified_at' => now(),
         ]);
-        StaffEmailUser::create([
-            'user_id' => $admin->id,
-            'staff_email_id' => StaffEmail::whereEmail($admin->email)->first()->id,
-        ]);
-        User::create([
+
+        $dentist = User::create([
             'email' => $this->users_seeding_emails['dentist'],
             'password' => Hash::make($this->default_password),
             'name' => 'dentist1',
             'role_id' => Role::getIdBySlug('dentist'),
+            'email_verified_at' => now(),
         ]);
 
-        User::create([
+        $secretary = User::create([
             'email' => $this->users_seeding_emails['secretary'],
             'password' => Hash::make($this->default_password),
             'name' => 'secretary1',
             'role_id' => Role::getIdBySlug('secretary'),
-
+            'email_verified_at' => now(),
+        ]);
+        StaffEmailUser::create([
+            'user_id' => $admin->id,
+            'staff_email_id' => StaffEmail::whereEmail($admin->email)->first()->id,
+        ]);
+        StaffEmailUser::create([
+            'user_id' => $dentist->id,
+            'staff_email_id' => StaffEmail::whereEmail($dentist->email)->first()->id,
+        ]);
+        StaffEmailUser::create([
+            'user_id' => $secretary->id,
+            'staff_email_id' => StaffEmail::whereEmail($secretary->email)->first()->id,
         ]);
     }
 }
