@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             StaffEmailSeeder::class,
             UsersSeeder::class,
+            UserPreferencesSeeder::class,
         ]);
     }
 }

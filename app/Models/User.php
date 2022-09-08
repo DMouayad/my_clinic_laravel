@@ -73,4 +73,9 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         $this->notify(new SendQueuedEmailVerificationNotification());
     }
+
+    public function userPreferences()
+    {
+        return $this->hasOne(UserPreferences::class);
+    }
 }
