@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api\Admin\Users;
 
+use Illuminate\Testing\Fluent\AssertableJson;
 use Symfony\Component\HttpFoundation\Response;
 
 class GetOnlyStaffUsersTest extends BaseUserApiRequestTest
@@ -15,15 +16,28 @@ class GetOnlyStaffUsersTest extends BaseUserApiRequestTest
     {
         return "get-staff-users";
     }
-
+    private $seeded_users_count = 3;
     function test_authorized_request()
     {
         $response = $this->makeRequestAuthorizedByUserAbility("admin");
         $response->assertStatus(Response::HTTP_OK)->assertJson(
-            fn($json) => $json
-                ->has("data", 3)
+            fn (AssertableJson $json) => $json
+                ->has(
+                    'data.0',
+                    fn ($userJson) => $userJson->hasAll([
+                        'id', 'email', 'role', 'created_at', 'updated_at'
+                    ])->etc()
+                )
+                ->has(
+                    'data.0',
+                    fn (AssertableJson $userJson) => $userJson->has(
+                        'role',
+                        fn (AssertableJson $roleJson) =>
+                        $roleJson->whereNot('name', 'Patient')->whereNot('slug', 'patient')
+                    )->etc()
+                )
                 ->where("status", Response::HTTP_OK)
-                ->where("total", 3)
+                ->where("total", $this->seeded_users_count)
                 ->where("errors", null)
         );
     }
