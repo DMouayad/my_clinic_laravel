@@ -82,12 +82,11 @@ class DeleteStaffEmailTest extends BaseStaffEmailApiRequestTest
                     ->where("status", Response::HTTP_CONFLICT)
                     ->has(
                         "errors.0",
-                        fn ($error) => $error
-                            ->has("message")
+                        fn (AssertableJson $error) => $error
                             ->where(
                                 "exception",
                                 DeletingOnlyAdminStaffEmailException::class
-                            )
+                            )->etc()
                     )
             );
     }

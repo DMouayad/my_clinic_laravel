@@ -89,12 +89,11 @@ class UpdateStaffEmailTest extends BaseStaffEmailApiRequestTest
                     ->where("status", Response::HTTP_CONFLICT)
                     ->has(
                         "errors.0",
-                        fn ($error) => $error
-                            ->has("message")
+                        fn (AssertableJson $error) => $error
                             ->where(
                                 "exception",
                                 StaffEmailAlreadyExistsException::class
-                            )
+                            )->etc()
                     )
             );
     }
@@ -119,9 +118,9 @@ class UpdateStaffEmailTest extends BaseStaffEmailApiRequestTest
                     ->where("status", Response::HTTP_UNPROCESSABLE_ENTITY)
                     ->has(
                         "errors.0",
-                        fn ($error) => $error
-                            ->has("message")
+                        fn (AssertableJson $error) => $error
                             ->where("exception", RoleNotFoundException::class)
+                            ->etc()
                     )
             );
     }

@@ -38,12 +38,12 @@ class LoginTest extends BaseApiRequestTestCase
     {
         $response = $this->makeRequest(data: $this->getValidLoginData());
         $response->assertStatus(Response::HTTP_OK)->assertJson(
-            fn(AssertableJson $json) => $json
+            fn (AssertableJson $json) => $json
                 ->where("status", Response::HTTP_OK)
                 ->has("message")
                 ->has(
                     "data",
-                    fn($data) => $data
+                    fn ($data) => $data
                         ->hasAll(["id", "token", "role"])
                         ->where("id", 1)
                         ->where("role", "admin")
@@ -84,7 +84,7 @@ class LoginTest extends BaseApiRequestTestCase
             ])
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJson(
-                fn(AssertableJson $json) => $json
+                fn (AssertableJson $json) => $json
                     ->has("errors", 2)
                     ->has("message")
             );
@@ -101,7 +101,7 @@ class LoginTest extends BaseApiRequestTestCase
         $response
             ->assertStatus(Response::HTTP_UNAUTHORIZED)
             ->assertJson(
-                fn(AssertableJson $json) => $json
+                fn (AssertableJson $json) => $json
                     ->has("errors", 1)
                     ->where("status", Response::HTTP_UNAUTHORIZED)
             );
@@ -118,7 +118,7 @@ class LoginTest extends BaseApiRequestTestCase
             ])
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJson(
-                fn(AssertableJson $json) => $json
+                fn (AssertableJson $json) => $json
                     ->has("errors", 1)
                     ->has("message")
             );

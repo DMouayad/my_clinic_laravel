@@ -7,7 +7,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class GetStaffEmailsWithRolesTest extends BaseStaffEmailApiRequestTest
 {
-    private        $seeded_staff_emails_count = 3;
+    private $seeded_staff_emails_count = 3;
 
     function getRouteName(): string
     {

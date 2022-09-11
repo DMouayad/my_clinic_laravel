@@ -59,17 +59,13 @@ trait ProvidesApiJsonResponse
         string|null $message = null,
         int $status_code = Response::HTTP_INTERNAL_SERVER_ERROR
     ) {
-        return new JsonResponse(
-            [
-                "errors" => [
-                    [
-                        "exception" => get_class($e),
-                        "message" => $message,
-                    ],
-                ],
-                "status" => $status_code,
-            ],
-            $status_code
+        return $this->errorResponse(
+            $status_code,
+            new CustomError(
+                message: $message ?? $e->getMessage(),
+                code: $e->getCode(),
+                exception: get_class($e),
+            )
         );
     }
 }
