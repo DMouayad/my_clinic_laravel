@@ -8,6 +8,7 @@ use App\Exceptions\StaffEmailAlreadyExistsException;
 use App\Exceptions\UserDoesntMatchHisStaffEmailException;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\StaffEmailResource;
+use App\Models\CustomError;
 use App\Models\StaffEmail;
 use App\Services\StaffEmailService;
 use App\Services\UserService;
@@ -145,9 +146,9 @@ class StaffEmailController extends Controller
         if ($was_deleted) {
             return $this->successResponse(message: "Deleted successfully");
         } else {
-            return $this->errorResponse([
-                "message" => "Failed to delete the Staff email",
-            ]);
+            return $this->errorResponse(
+                errors: new CustomError("Failed to delete the Staff email")
+            );
         }
     }
 }

@@ -85,13 +85,17 @@ class RegisterTest extends BaseApiRequestTestCase
                 "password" => $this->default_password,
             ]
         );
-        $response
-            ->assertForbidden()
-            ->assertJson(
-                fn(AssertableJson $json) => $json
-                    ->where("status", Response::HTTP_FORBIDDEN)
-                    ->has("error", fn($error) => $error->has("message"))
-            );
+        $response->assertForbidden()->assertJson(
+            fn(AssertableJson $json) => $json
+                ->where("status", Response::HTTP_FORBIDDEN)
+                ->has("errors", 1)
+                ->has(
+                    "errors.0",
+                    fn(AssertableJson $error) => $error
+                        ->whereNot("message", null)
+                        ->etc()
+                )
+        );
     }
 
     function test_request_by_unauthorized_user()
@@ -173,7 +177,7 @@ class RegisterTest extends BaseApiRequestTestCase
             fn(AssertableJson $json) => $json
                 ->where("status", Response::HTTP_CONFLICT)
                 ->has(
-                    "error",
+                    "errors.0",
                     fn($json) => $json
                         ->where(
                             "exception",

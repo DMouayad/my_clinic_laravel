@@ -7,6 +7,8 @@ use Symfony\Component\HttpFoundation\Response;
 
 class GetStaffEmailsWithRolesTest extends BaseStaffEmailApiRequestTest
 {
+    private        $seeded_staff_emails_count = 3;
+
     function getRouteName(): string
     {
         return "get-staff-emails-with-roles";
@@ -20,18 +22,16 @@ class GetStaffEmailsWithRolesTest extends BaseStaffEmailApiRequestTest
     public function test_authorized_request()
     {
         $response = $this->makeRequestAuthorizedByUserAbility("admin");
-        $seeded_staff_emails_count = 3;
         $response->assertJson(
-            fn(AssertableJson $json) => $json
+            fn (AssertableJson $json) => $json
                 ->has(
                     "data",
-                    $seeded_staff_emails_count,
-                    fn($json) => $json->hasAll(["id", "email", "role"])
+                    $this->seeded_staff_emails_count,
+                    fn ($json) => $json->hasAll(["id", "email", "role"])
                 )
                 ->where("errors", null)
                 ->where("status", Response::HTTP_OK)
-                ->where("total", $seeded_staff_emails_count)
-                ->where("total", $seeded_staff_emails_count)
+                ->where("total", $this->seeded_staff_emails_count)
         );
     }
 }

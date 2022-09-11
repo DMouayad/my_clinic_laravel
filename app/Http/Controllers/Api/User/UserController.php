@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\User;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
+use App\Models\CustomError;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\UserService;
@@ -62,20 +63,20 @@ class UserController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(
-        Request $request,
-        User $user,
+        Request     $request,
+        User        $user,
         UserService $userService
-    ) {
+    )
+    {
         $deleted = $userService->delete($user, $request->user());
         if ($deleted) {
             return $this->successResponse(
                 status_code: Response::HTTP_NO_CONTENT
             );
         } else {
-            return $this->errorResponse([
-                "message" =>
-                "user with id (" . $user->id . ") was not deleted!",
-            ]);
+            return $this->errorResponse(
+                errors: new CustomError("user with id (" . $user->id . ") was not deleted!")
+            );
         }
     }
 

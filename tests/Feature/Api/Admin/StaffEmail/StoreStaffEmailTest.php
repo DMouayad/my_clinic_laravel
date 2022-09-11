@@ -32,7 +32,7 @@ class StoreStaffEmailTest extends BaseStaffEmailApiRequestTest
         );
 
         $response->assertJson(
-            fn(AssertableJson $json) => $json
+            fn (AssertableJson $json) => $json
                 ->has("message")
                 ->where("data", null)
                 ->where("status", Response::HTTP_CREATED)
@@ -49,7 +49,7 @@ class StoreStaffEmailTest extends BaseStaffEmailApiRequestTest
             ])
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJson(
-                fn(AssertableJson $json) => $json
+                fn (AssertableJson $json) => $json
                     ->has("errors", 2)
                     ->has("message")
             );
@@ -71,7 +71,7 @@ class StoreStaffEmailTest extends BaseStaffEmailApiRequestTest
                 "email" => ["The email must be a valid email address."],
             ])
             ->assertJson(
-                fn(AssertableJson $json) => $json
+                fn (AssertableJson $json) => $json
                     ->has("errors", 1)
                     ->has("message")
             );
@@ -90,11 +90,11 @@ class StoreStaffEmailTest extends BaseStaffEmailApiRequestTest
         $response
             ->assertStatus(Response::HTTP_CONFLICT)
             ->assertJson(
-                fn(AssertableJson $json) => $json
+                fn (AssertableJson $json) => $json
                     ->where("status", Response::HTTP_CONFLICT)
                     ->has(
-                        "error",
-                        fn($error) => $error
+                        "errors.0",
+                        fn ($error) => $error
                             ->has("message")
                             ->where(
                                 "exception",
@@ -117,11 +117,11 @@ class StoreStaffEmailTest extends BaseStaffEmailApiRequestTest
         $response
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJson(
-                fn(AssertableJson $json) => $json
+                fn (AssertableJson $json) => $json
                     ->where("status", Response::HTTP_UNPROCESSABLE_ENTITY)
                     ->has(
-                        "error",
-                        fn($error) => $error
+                        "errors.0",
+                        fn ($error) => $error
                             ->has("message")
                             ->where("exception", RoleNotFoundException::class)
                     )

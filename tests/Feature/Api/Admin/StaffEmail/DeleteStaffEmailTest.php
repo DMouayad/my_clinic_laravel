@@ -39,7 +39,7 @@ class DeleteStaffEmailTest extends BaseStaffEmailApiRequestTest
         $this->setRouteParameters(["staff_email" => 2]);
         $response = $this->makeRequestAuthorizedByUserAbility("admin");
         $response->assertStatus(Response::HTTP_OK)->assertJson(
-            fn(AssertableJson $json) => $json
+            fn (AssertableJson $json) => $json
                 ->where("data", null)
                 ->where("status", Response::HTTP_OK)
                 ->missing("errors")
@@ -62,7 +62,7 @@ class DeleteStaffEmailTest extends BaseStaffEmailApiRequestTest
 
         $response = $this->makeRequestAuthorizedByUserAbility("admin");
         $response->assertStatus(Response::HTTP_NOT_FOUND)->assertJson(
-            fn(AssertableJson $json) => $json
+            fn (AssertableJson $json) => $json
                 ->where("exception", NotFoundHttpException::class)
                 ->has("message")
                 ->etc()
@@ -74,14 +74,15 @@ class DeleteStaffEmailTest extends BaseStaffEmailApiRequestTest
         $this->setRouteParameters(["staff_email" => 1]);
 
         $response = $this->makeRequestAuthorizedByUserAbility("admin");
+        var_dump($response->content());
         $response
             ->assertStatus(Response::HTTP_CONFLICT)
             ->assertJson(
-                fn(AssertableJson $json) => $json
+                fn (AssertableJson $json) => $json
                     ->where("status", Response::HTTP_CONFLICT)
                     ->has(
-                        "error",
-                        fn($error) => $error
+                        "errors.0",
+                        fn ($error) => $error
                             ->has("message")
                             ->where(
                                 "exception",

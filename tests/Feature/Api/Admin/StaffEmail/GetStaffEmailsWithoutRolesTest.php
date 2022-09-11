@@ -31,7 +31,6 @@ class GetStaffEmailsWithoutRolesTest extends BaseStaffEmailApiRequestTest
                 ->where("errors", null)
                 ->where("status", Response::HTTP_OK)
                 ->where("total", $seeded_staff_emails_count)
-                ->where("total", $seeded_staff_emails_count)
         );
     }
 }

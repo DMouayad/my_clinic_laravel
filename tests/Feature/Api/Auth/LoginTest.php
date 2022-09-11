@@ -66,6 +66,7 @@ class LoginTest extends BaseApiRequestTestCase
 
     function test_request_by_unauthorized_user()
     {
+        // test login for an already logged in user
         $response = $this->makeRequestAuthorizedByUserAbility(
             "admin",
             data: $this->getValidLoginData()
@@ -86,6 +87,23 @@ class LoginTest extends BaseApiRequestTestCase
                 fn(AssertableJson $json) => $json
                     ->has("errors", 2)
                     ->has("message")
+            );
+    }
+
+    function test_request_with_invalid_email()
+    {
+        $response = $this->makeRequest(
+            data: [
+                "email" => "randomEmail@myclinic.com",
+                "password" => "password",
+            ]
+        );
+        $response
+            ->assertStatus(Response::HTTP_UNAUTHORIZED)
+            ->assertJson(
+                fn(AssertableJson $json) => $json
+                    ->has("errors", 1)
+                    ->where("status", Response::HTTP_UNAUTHORIZED)
             );
     }
 

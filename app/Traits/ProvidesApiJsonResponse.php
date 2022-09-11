@@ -2,7 +2,7 @@
 
 namespace App\Traits;
 
-use App\Exceptions\EmailAlreadyRegisteredException;
+use App\Models\CustomError;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -36,13 +36,13 @@ trait ProvidesApiJsonResponse
      * @return \\Illuminate\Http\JsonResponse
      */
     protected function errorResponse(
-        array|null $error = null,
-        int $status_code = Response::HTTP_INTERNAL_SERVER_ERROR
+        int $status_code = Response::HTTP_INTERNAL_SERVER_ERROR,
+        ?CustomError ...$errors
     ) {
         return new JsonResponse(
             [
+                "errors" => $errors,
                 "status" => $status_code,
-                "error" => $error,
             ],
             $status_code
         );
@@ -61,33 +61,15 @@ trait ProvidesApiJsonResponse
     ) {
         return new JsonResponse(
             [
-                "error" => [
-                    "exception" => get_class($e),
-                    "message" => $message,
+                "errors" => [
+                    [
+                        "exception" => get_class($e),
+                        "message" => $message,
+                    ],
                 ],
                 "status" => $status_code,
             ],
             $status_code
         );
-    }
-
-    private function getExceptionStatusCode($exception)
-    {
-        $status_code = Response::HTTP_INTERNAL_SERVER_ERROR;
-        switch (get_class($exception)) {
-            case StaffEmailAlreadyExistsException::class:
-                $status_code = Response::HTTP_CONFLICT;
-                break;
-            case EmailAlreadyRegisteredException::class:
-                $status_code = Response::HTTP_CONFLICT;
-                break;
-            case RoleNotFoundException::class:
-                $status_code = Response::HTTP_UNPROCESSABLE_ENTITY;
-                break;
-            case UnauthorizedToDeleteUserException::class:
-                $status_code = Response::HTTP_UNAUTHORIZED;
-                break;
-        }
-        return $status_code;
     }
 }
