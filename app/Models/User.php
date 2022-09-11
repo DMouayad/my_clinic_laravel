@@ -10,6 +10,10 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use App\Notifications\SendQueuedEmailVerificationNotification;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use App\Exceptions\UserNotFoundException;
+use App\Exceptions\UserPreferencesAlreadyExistsException;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -74,8 +78,30 @@ class User extends Authenticatable implements MustVerifyEmail
         $this->notify(new SendQueuedEmailVerificationNotification());
     }
 
-    public function userPreferences()
+    public function preferences(): HasOne
     {
         return $this->hasOne(UserPreferences::class);
+    }
+
+    public static function checkIfExists(int $user_id)
+    {
+        try {
+            User::findOrFail($user_id);
+        } catch (ModelNotFoundException $e) {
+            throw new UserNotFoundException($user_id);
+        }
+    }
+    /**
+     *
+     * @param integer $user_id
+     * @return void
+     * @throws UserPreferencesAlreadyExistsException
+     */
+    public static function checkHasPreferences(int $user_id)
+    {
+        $has_prefs = User::whereId($user_id)->first()->preferences()->exists();
+        if ($has_prefs) {
+            throw new UserPreferencesAlreadyExistsException($user_id);
+        }
     }
 }

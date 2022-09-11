@@ -2,29 +2,17 @@
 
 namespace App\Services;
 
-use App\Exceptions\UserNotFoundException;
 use App\Models\User;
 use App\Models\UserPreferences;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
+use App\Exceptions\UserNotFoundException;
+use App\Exceptions\UserPreferencesAlreadyExistsException;
 
 
 
 class UserPreferencesService
 {
-    /**
-     * Check if there's a user exists with the provided id
-     *
-     * @param integer $user_id
-     * @return void
-     */
-    private function checkUserExists(int $user_id)
-    {
-        try {
-            User::findOrFail($user_id);
-        } catch (ModelNotFoundException $e) {
-            throw new UserNotFoundException($user_id);
-        }
-    }
+
+
     /**
      *
      * @param integer $user_id
@@ -32,10 +20,14 @@ class UserPreferencesService
      * @param string|null $language
      * @return UserPreferences|null
      * @throws UserNotFoundException
+     * @throws UserPreferencesAlreadyExistsException
+
      */
     public function store(int $user_id, string|null $theme, string|null $language): UserPreferences|null
     {
-        $this->checkUserExists($user_id);
+        User::checkIfExists($user_id);
+        User::checkHasPreferences($user_id);
+
         $user_preferences = new UserPreferences();
         $user_preferences->user_id = $user_id;
         $user_preferences->theme = $theme;
