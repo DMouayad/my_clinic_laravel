@@ -19,10 +19,14 @@ class GetMyInfoTest extends BaseUsersApiRequestTest
     function test_authorized_request()
     {
         $response = $this->makeRequestAuthorizedByUserAbility("admin");
-
         $response->assertStatus(Response::HTTP_OK)->assertJson(
             fn ($json) => $json
-                ->has("data")
+                ->has(
+                    "data",
+                    fn ($userJson) => $userJson->hasAll(
+                        ['id', 'email', 'preferences', 'created_at', 'updated_at', 'email_verified_at']
+                    )->missing('role')
+                )
                 ->where("status", Response::HTTP_OK)
                 ->where("errors", null)
         );
