@@ -3,6 +3,7 @@
 namespace Tests\Feature\Api\Admin\Users;
 
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Testing\Fluent\AssertableJson;
 
 class GetAllUsersTest extends BaseUserApiRequestTest
 {
@@ -20,8 +21,14 @@ class GetAllUsersTest extends BaseUserApiRequestTest
     {
         $response = $this->makeRequestAuthorizedByUserAbility("admin");
         $response->assertStatus(Response::HTTP_OK)->assertJson(
-            fn($json) => $json
+            fn (AssertableJson $json) => $json
                 ->has("data", 3)
+                ->has(
+                    'data.0',
+                    fn (AssertableJson $userJson) => $userJson->hasAll([
+                        'id', 'email', 'role', 'created_at', 'updated_at'
+                    ])->etc()
+                )
                 ->where("status", Response::HTTP_OK)
                 ->where("total", 3)
                 ->where("errors", null)
