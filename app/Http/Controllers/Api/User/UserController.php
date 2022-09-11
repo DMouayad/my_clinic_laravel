@@ -22,7 +22,8 @@ class UserController extends Controller
 
     public function __construct()
     {
-        $this->middleware(["auth:sanctum", "verified"]);
+        $this->middleware(["auth:sanctum", "verified"])->only('show');
+        $this->middleware(["auth:sanctum", 'ability:admin', "verified"])->except('show');
         $this->setResource(UserResource::class);
         $this->setPerPage(env("USER_PER_PAGE"));
     }
@@ -34,7 +35,9 @@ class UserController extends Controller
      **/
     public function index(): ?JsonResource
     {
-        return $this->collection($this->paginateWhenNeeded(User::all()));
+        return $this->collection(
+            $this->paginateWhenNeeded(User::with('role')->get())
+        );
     }
 
     /**
@@ -47,7 +50,7 @@ class UserController extends Controller
         $patient_role_id = Role::getIdBySlug("patient");
         return $this->collection(
             $this->paginateWhenNeeded(
-                User::whereNot("role_id", $patient_role_id)
+                User::whereNot("role_id", $patient_role_id)->with('role')
             )
         );
     }
@@ -71,7 +74,7 @@ class UserController extends Controller
         } else {
             return $this->errorResponse([
                 "message" =>
-                    "user with id (" . $user->id . ") was not deleted!",
+                "user with id (" . $user->id . ") was not deleted!",
             ]);
         }
     }
@@ -82,6 +85,6 @@ class UserController extends Controller
      */
     public function show(Request $request): ?JsonResource
     {
-        return $this->resource($request->user());
+        return $this->resource($request->user()->load('preferences'));
     }
 }
