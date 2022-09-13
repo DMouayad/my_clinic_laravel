@@ -1,0 +1,27 @@
+{
+  "name": "ddragon/sanctum-refresh-token",
+  "description": "add refresh token feature to laravel sanctum official package",
+  "type": "library",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "DDragon\\SanctumRefreshToken\\": "src/"
+    }
+  },
+  "authors": [
+    {
+      "name": "DDragon",
+      "email": "muayad.perun@outlook.com"
+    }
+  ],
+  "require": {
+    "laravel/sanctum": "^3.0"
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "DDragon\\SanctumRefreshToken\\SanctumRefreshTokenServiceProvider"
+      ]
+    }
+  }
+}
