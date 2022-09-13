@@ -14,6 +14,6 @@ return [
    |
    */
 
-    'expiration' => null,
+    'expiration' => 10080,
 
 ];
