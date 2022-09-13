@@ -43,10 +43,15 @@ class LoginTest extends BaseApiRequestTestCase
                 ->has("message")
                 ->has(
                     "data",
-                    fn ($data) => $data
-                        ->hasAll(["id", "token", "role"])
-                        ->where("id", 1)
-                        ->where("role", "admin")
+                    fn (AssertableJson $data) => $data->hasAll([
+                        "token", "user"
+                    ])
+                )
+                ->has(
+                    "data.user",
+                    fn (AssertableJson $data) => $data
+                        ->hasAll(["role", "preferences"])
+                        ->etc()
                 )
         );
     }

@@ -45,7 +45,7 @@ class LoginController extends Controller
                 new CustomError("invalid credentials - email not found!")
             );
         }
-        if (!Hash::check($request->password, $user->password)) {
+        if (!Hash::check($credentials["password"], $user->password)) {
             return $this->errorResponse(
                 JsonResponse::HTTP_UNAUTHORIZED,
                 new CustomError("invalid credentials - incorrect password!")
@@ -57,9 +57,8 @@ class LoginController extends Controller
         $token = $user->createToken($token_name, [$role_slug])->plainTextToken;
 
         return $this->successResponse([
-            "id" => $user->id,
+            "user" => $user->load('preferences'),
             "token" => $token,
-            "role" => $role_slug,
         ]);
     }
 }
