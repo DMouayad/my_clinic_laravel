@@ -77,13 +77,15 @@ abstract class BaseApiRequestTestCase extends TestCase
      * @param array $data
      * @return TestResponse
      */
-    protected function makeRequest(array $data = []): TestResponse
-    {
+    protected function makeRequest(
+        array $data = [],
+        array $headers = []
+    ): TestResponse {
         return $this->json(
             $this->getRequestMethod(),
             $this->getRouteUri(),
             $data,
-            headers: ["Accept" => "application/json"]
+            headers: ["Accept" => "application/json", ...$headers]
         );
     }
 
