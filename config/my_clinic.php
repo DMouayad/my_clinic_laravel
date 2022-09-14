@@ -1,7 +1,6 @@
 <?php
 
 return [
-
     /*
     |--------------------------------------------------------------------------
     | Hydra Version
@@ -11,7 +10,7 @@ return [
     |
     */
 
-    'version' => env('APP_VERSION', '1.0.0'),
+    "version" => env("APP_VERSION", "1.0.0"),
 
     /*
     |--------------------------------------------------------------------------
@@ -25,7 +24,7 @@ return [
     |
     */
 
-    'default_user_role_slug' => env('DEFAULT_ROLE_SLUG', 'user'),
+    "default_user_role_slug" => env("DEFAULT_ROLE_SLUG", "user"),
 
     /*
     |--------------------------------------------------------------------------
@@ -37,5 +36,5 @@ return [
     |
     */
 
-    'delete_previous_access_tokens_on_login' => env('DELETE_PREVIOUS_ACCESS_TOKENS_ON_LOGIN', false),
+    "delete_device_previous_auth_tokens_on_login" => true,
 ];
