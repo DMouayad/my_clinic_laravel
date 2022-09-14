@@ -55,11 +55,13 @@ class LoginController extends Controller
             );
         }
         $role_slug = $user->role->slug;
-        $token_name = $params["device_id"];
-
+        $device_id = $params["device_id"];
+        if (config("my_clinic.delete_device_previous_auth_tokens_on_login")) {
+            $user->deleteDeviceTokens($device_id);
+        }
         $tokens_arr = $this->getResponseTokens(
-            $user->createRefreshToken($token_name),
-            $user->createToken($token_name, [$role_slug])
+            $user->createRefreshToken($device_id),
+            $user->createToken($device_id, [$role_slug])
         );
 
         return $this->successResponse([
@@ -67,4 +69,6 @@ class LoginController extends Controller
             ...$tokens_arr,
         ]);
     }
+
+
 }

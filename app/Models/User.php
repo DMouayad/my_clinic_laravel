@@ -102,4 +102,16 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         $this->notify(new SendQueuedEmailVerificationNotification());
     }
+
+    public function deleteDeviceTokens(string $device_id)
+    {
+        $this
+            ->tokens()
+            ->where("name", $device_id)
+            ->delete();
+        $this
+            ->refreshTokens()
+            ->where("name", $device_id)
+            ->delete();
+    }
 }
