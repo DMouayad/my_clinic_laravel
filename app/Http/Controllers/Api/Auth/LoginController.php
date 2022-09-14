@@ -6,13 +6,15 @@ use App\Http\Controllers\Controller;
 use App\Models\CustomError;
 use App\Models\User;
 use App\Traits\ProvidesApiJsonResponse;
+use App\Traits\ProvidesResponseTokens;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Symfony\Component\HttpFoundation\Response;
 
 class LoginController extends Controller
 {
-    use ProvidesApiJsonResponse;
+    use ProvidesApiJsonResponse, ProvidesResponseTokens;
 
     /**
      * Create a new controller instance.
@@ -32,33 +34,37 @@ class LoginController extends Controller
      */
     public function login(Request $request)
     {
-        $credentials = $request->validate([
+        $params = $request->validate([
             "email" => "required|email",
             "password" => "required|string|min:8",
+            "device_id" => "required|string",
         ]);
 
-        $user = User::whereEmail(strtolower($credentials["email"]))->first();
+        $user = User::whereEmail(strtolower($params["email"]))->first();
 
         if (!$user) {
             return $this->errorResponse(
-                JsonResponse::HTTP_UNAUTHORIZED,
+                Response::HTTP_UNAUTHORIZED,
                 new CustomError("invalid credentials - email not found!")
             );
         }
-        if (!Hash::check($credentials["password"], $user->password)) {
+        if (!Hash::check($params["password"], $user->password)) {
             return $this->errorResponse(
-                JsonResponse::HTTP_UNAUTHORIZED,
+                Response::HTTP_UNAUTHORIZED,
                 new CustomError("invalid credentials - incorrect password!")
             );
         }
         $role_slug = $user->role->slug;
-        $token_name = $request->device_name ?? $user->name . " token";
+        $token_name = $params["device_id"];
 
-        $token = $user->createToken($token_name, [$role_slug])->plainTextToken;
+        $tokens_arr = $this->getResponseTokens(
+            $user->createRefreshToken($token_name),
+            $user->createToken($token_name, [$role_slug])
+        );
 
         return $this->successResponse([
-            "user" => $user->load('preferences'),
-            "token" => $token,
+            "user" => $user->load("preferences"),
+            ...$tokens_arr,
         ]);
     }
 }
