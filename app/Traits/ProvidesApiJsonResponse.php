@@ -2,6 +2,7 @@
 
 namespace App\Traits;
 
+use App\Exceptions\CustomException;
 use App\Models\CustomError;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -31,9 +32,10 @@ trait ProvidesApiJsonResponse
     }
 
     /**
-     * @param array|null $error
-     * @param integer $status_code
-     * @return \\Illuminate\Http\JsonResponse
+     *
+     * @param [type] $status_code
+     * @param \App\Models\CustomError|null ...$errors
+     * @return \Illuminate\Http\JsonResponse
      */
     protected function errorResponse(
         int $status_code = Response::HTTP_INTERNAL_SERVER_ERROR,
@@ -49,13 +51,13 @@ trait ProvidesApiJsonResponse
     }
 
     /**
-     * @param Exception $e
+     * @param \App\Exceptions\CustomException $e
      * @param string|null $message
      * @param integer $status_code
      * @return \Illuminate\Http\JsonResponse
      */
     protected function errorResponseFromException(
-        Exception $e,
+        CustomException $e,
         string|null $message = null,
         int $status_code = Response::HTTP_INTERNAL_SERVER_ERROR
     ) {
@@ -64,7 +66,7 @@ trait ProvidesApiJsonResponse
             new CustomError(
                 message: $message ?? $e->getMessage(),
                 code: $e->getCode(),
-                exception: get_class($e),
+                exception: $e::className(),
             )
         );
     }
