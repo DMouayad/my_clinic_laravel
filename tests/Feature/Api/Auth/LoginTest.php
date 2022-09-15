@@ -30,11 +30,6 @@ class LoginTest extends BaseApiRequestTestCase
         return "POST";
     }
 
-    function test_route_has_specified_middleware()
-    {
-        $this->assertRouteContainsMiddleware();
-    }
-
     function test_authorized_request()
     {
         $response = $this->makeRequest(data: $this->getValidLoginData());
@@ -48,8 +43,13 @@ class LoginTest extends BaseApiRequestTestCase
                         "user",
                         "access_token",
                         "refresh_token",
-                        "expires_in_minutes",
                     ])
+                )
+                ->has(
+                    "data.access_token",
+                    fn(AssertableJson $accessToken) => $accessToken
+                        ->whereType("token", "string")
+                        ->has("expires_at")
                 )
                 ->has(
                     "data.user",
@@ -82,6 +82,11 @@ class LoginTest extends BaseApiRequestTestCase
             data: $this->getValidLoginData()
         );
         $response->assertForbidden();
+    }
+
+    function test_route_has_specified_middleware()
+    {
+        $this->assertRouteContainsMiddleware();
     }
 
     function test_request_with_missing_email_returns_error()

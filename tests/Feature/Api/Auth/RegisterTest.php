@@ -36,30 +36,26 @@ class RegisterTest extends BaseApiRequestTestCase
         return "POST";
     }
 
-    function test_route_has_specified_middleware()
-    {
-        $this->assertRouteContainsMiddleware();
-    }
-
     function test_authorized_request()
     {
         $response = $this->makeRequest(data: $this->getValidRegistrationData());
         $response->assertStatus(Response::HTTP_CREATED)->assertJson(
-            fn(AssertableJson $json) => $json
+            fn (AssertableJson $json) => $json
                 ->where("status", Response::HTTP_CREATED)
                 ->has("message")
                 ->has(
                     "data",
-                    fn($data) => $data
-                        ->hasAll([
-                            "user",
-                            "refresh_token",
+                    fn ($data) => $data
+                        ->hasAll(["user", "refresh_token", "access_token"])
+                        ->has(
                             "access_token",
-                            "expires_in_minutes",
-                        ])
+                            fn (AssertableJson $accessToken) => $accessToken
+                                ->whereType("token", "string")
+                                ->has("expires_at")
+                        )
                         ->has(
                             "user",
-                            fn($user) => $user
+                            fn ($user) => $user
                                 ->where("id", 1)
                                 ->where("name", "testName")
                                 ->hasAll([
@@ -95,12 +91,12 @@ class RegisterTest extends BaseApiRequestTestCase
             ]
         );
         $response->assertForbidden()->assertJson(
-            fn(AssertableJson $json) => $json
+            fn (AssertableJson $json) => $json
                 ->where("status", Response::HTTP_FORBIDDEN)
                 ->has("errors", 1)
                 ->has(
                     "errors.0",
-                    fn(AssertableJson $error) => $error
+                    fn (AssertableJson $error) => $error
                         ->whereNot("message", null)
                         ->etc()
                 )
@@ -124,6 +120,11 @@ class RegisterTest extends BaseApiRequestTestCase
         return $testing_users_helper->createAdminUser(grant_token: true);
     }
 
+    function test_route_has_specified_middleware()
+    {
+        $this->assertRouteContainsMiddleware();
+    }
+
     function test_request_with_missing_email()
     {
         $response = $this->makeRequest(
@@ -135,7 +136,7 @@ class RegisterTest extends BaseApiRequestTestCase
             ])
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJson(
-                fn(AssertableJson $json) => $json
+                fn (AssertableJson $json) => $json
                     ->has("errors", 1)
                     ->has("errors.email")
                     ->has("message")
@@ -153,7 +154,7 @@ class RegisterTest extends BaseApiRequestTestCase
             ])
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJson(
-                fn(AssertableJson $json) => $json
+                fn (AssertableJson $json) => $json
                     ->has("errors", 1)
                     ->has("message")
             );
@@ -171,7 +172,7 @@ class RegisterTest extends BaseApiRequestTestCase
             ])
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJson(
-                fn(AssertableJson $json) => $json
+                fn (AssertableJson $json) => $json
                     ->has("errors", 1)
                     ->has("errors.password")
                     ->has("message")
@@ -189,7 +190,7 @@ class RegisterTest extends BaseApiRequestTestCase
             ])
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJson(
-                fn(AssertableJson $json) => $json
+                fn (AssertableJson $json) => $json
                     ->has("errors", 1)
                     ->has("errors.device_id")
                     ->has("message")
@@ -205,7 +206,7 @@ class RegisterTest extends BaseApiRequestTestCase
             ])
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJson(
-                fn(AssertableJson $json) => $json
+                fn (AssertableJson $json) => $json
                     ->has("errors", 1)
                     ->has("errors.email")
                     ->has("message")
@@ -219,14 +220,14 @@ class RegisterTest extends BaseApiRequestTestCase
         // register again
         $response = $this->makeRequest($this->getValidRegistrationData());
         $response->assertJson(
-            fn(AssertableJson $json) => $json
+            fn (AssertableJson $json) => $json
                 ->where("status", Response::HTTP_CONFLICT)
                 ->has(
                     "errors.0",
-                    fn($error) => $error
+                    fn (AssertableJson $error) => $error
                         ->where(
                             "exception",
-                            EmailAlreadyRegisteredException::class
+                            EmailAlreadyRegisteredException::className()
                         )
                         ->hasAll([
                             "message",

@@ -74,7 +74,6 @@ class DeleteStaffEmailTest extends BaseStaffEmailApiRequestTest
         $this->setRouteParameters(["staff_email" => 1]);
 
         $response = $this->makeRequestAuthorizedByUserAbility("admin");
-        var_dump($response->content());
         $response
             ->assertStatus(Response::HTTP_CONFLICT)
             ->assertJson(
@@ -85,7 +84,7 @@ class DeleteStaffEmailTest extends BaseStaffEmailApiRequestTest
                         fn (AssertableJson $error) => $error
                             ->where(
                                 "exception",
-                                DeletingOnlyAdminStaffEmailException::class
+                                DeletingOnlyAdminStaffEmailException::className()
                             )->etc()
                     )
             );

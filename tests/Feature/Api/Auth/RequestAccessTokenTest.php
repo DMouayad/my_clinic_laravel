@@ -67,11 +67,14 @@ class RequestAccessTokenTest extends BaseApiRequestTestCase
             fn(AssertableJson $json) => $json
                 ->has(
                     "data",
-                    fn(AssertableJson $data) => $data->hasAll([
-                        "refresh_token",
-                        "access_token",
-                        "expires_in_minutes",
-                    ])
+                    fn(AssertableJson $data) => $data
+                        ->hasAll(["refresh_token", "access_token"])
+                        ->has(
+                            "access_token",
+                            fn(AssertableJson $accessToken) => $accessToken
+                                ->whereType("token", "string")
+                                ->has("expires_at")
+                        )
                 )
                 ->where("status", Response::HTTP_OK)
                 ->has("message")

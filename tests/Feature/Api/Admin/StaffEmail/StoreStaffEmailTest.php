@@ -97,7 +97,7 @@ class StoreStaffEmailTest extends BaseStaffEmailApiRequestTest
                         fn (AssertableJson $error) => $error
                             ->where(
                                 "exception",
-                                StaffEmailAlreadyExistsException::class
+                                StaffEmailAlreadyExistsException::className()
                             )->etc()
                     )
             );
@@ -121,7 +121,7 @@ class StoreStaffEmailTest extends BaseStaffEmailApiRequestTest
                     ->has(
                         "errors.0",
                         fn ($error) => $error
-                            ->where("exception", RoleNotFoundException::class)
+                            ->where("exception", RoleNotFoundException::className())
                             ->etc()
                     )
             );
