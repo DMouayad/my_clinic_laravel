@@ -23,8 +23,13 @@ class UserController extends Controller
 
     public function __construct()
     {
-        $this->middleware(["auth:sanctum", "verified"])->only('show');
-        $this->middleware(["auth:sanctum", 'ability:admin', "verified"])->except('show');
+        $this->middleware(["auth:sanctum", "verified"])->only("show");
+        $this->middleware([
+            "auth:sanctum",
+            "ability:admin",
+            "verified",
+        ])->except("show");
+
         $this->setResource(UserResource::class);
         $this->setPerPage(env("USER_PER_PAGE"));
     }
@@ -37,7 +42,7 @@ class UserController extends Controller
     public function index(): ?JsonResource
     {
         return $this->collection(
-            $this->paginateWhenNeeded(User::with('role')->get())
+            $this->paginateWhenNeeded(User::with("role")->get())
         );
     }
 
@@ -51,9 +56,14 @@ class UserController extends Controller
         $patient_role_id = Role::getIdBySlug("patient");
         return $this->collection(
             $this->paginateWhenNeeded(
-                User::whereNot("role_id", $patient_role_id)->with('role')
+                User::whereNot("role_id", $patient_role_id)->with("role")
             )
         );
+    }
+
+    public function deleteMyAccount(Request $request, UserService $userService)
+    {
+        return $this->destroy($request, $request->user(), $userService);
     }
 
     /**
@@ -63,11 +73,10 @@ class UserController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(
-        Request     $request,
-        User        $user,
+        Request $request,
+        User $user,
         UserService $userService
-    )
-    {
+    ) {
         $deleted = $userService->delete($user, $request->user());
         if ($deleted) {
             return $this->successResponse(
@@ -75,7 +84,9 @@ class UserController extends Controller
             );
         } else {
             return $this->errorResponse(
-                errors: new CustomError("user with id (" . $user->id . ") was not deleted!")
+                error: new CustomError(
+                    "user with id (" . $user->id . ") was not deleted!"
+                )
             );
         }
     }
@@ -86,6 +97,6 @@ class UserController extends Controller
      */
     public function show(Request $request): ?JsonResource
     {
-        return $this->resource($request->user()->load('preferences'));
+        return $this->resource($request->user()->load("preferences"));
     }
 }

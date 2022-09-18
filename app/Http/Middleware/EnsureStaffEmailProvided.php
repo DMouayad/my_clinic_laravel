@@ -2,16 +2,16 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\CustomError;
+use App\Exceptions\EmailUnauthorizedToRegisterException;
 use App\Models\StaffEmail;
 use App\Traits\ProvidesApiJsonResponse;
+use App\Traits\ProvidesCustomRequestValidator;
 use Closure;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class EnsureStaffEmailProvided
 {
-    use ProvidesApiJsonResponse;
+    use ProvidesApiJsonResponse, ProvidesCustomRequestValidator;
 
     /**
      * Handle an incoming request.
@@ -22,23 +22,16 @@ class EnsureStaffEmailProvided
      */
     public function handle(Request $request, Closure $next)
     {
-        $email_to_register = $request->validate(["email" => "required|email"])[
-            "email"
-        ];
+        $email_to_register = $this->customValidate($request, [
+            "email" => "required|email",
+        ])["email"];
 
         $staff_email = StaffEmail::where("email", $email_to_register)->first();
 
         if ($staff_email) {
             return $next($request);
         } else {
-            return $this->errorResponse(
-                JsonResponse::HTTP_FORBIDDEN,
-                new CustomError(
-                    "The email address (" .
-                        $email_to_register .
-                        ") is not allowed to register."
-                )
-            );
+            throw new EmailUnauthorizedToRegisterException($email_to_register);
         }
     }
 }

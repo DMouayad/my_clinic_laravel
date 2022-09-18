@@ -14,7 +14,6 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-//use DDragon\SanctumRefreshToken\HasRefreshTokens;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -42,7 +41,13 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $casts = [
         "email_verified_at" => "datetime",
     ];
-
+    /**
+     * Check if there's a user with the provided ID
+     *
+     * @param integer $user_id
+     * @return void
+     * @throws UserNotFoundException
+     */
     public static function checkIfExists(int $user_id)
     {
         try {
@@ -102,7 +107,13 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         $this->notify(new SendQueuedEmailVerificationNotification());
     }
-
+    /**
+     * deletes any previous personal access token and refresh tokens for 
+     * the specified device id
+     * 
+     * @param string $device_id
+     * @return void
+     */
     public function deleteDeviceTokens(string $device_id)
     {
         $this

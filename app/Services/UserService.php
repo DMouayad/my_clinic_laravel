@@ -24,8 +24,11 @@ class UserService
      * @return \App\Models\User
      * @throws \App\Exceptions\EmailAlreadyRegisteredException
      */
-    public function createNewUser(string $email, string $name, string $password)
-    {
+    public function createNewUser(
+        string $email,
+        string $name,
+        string $password
+    ): User {
         $this->checkEmailAlreadyRegistered($email);
         $user = User::create([
             "email" => $email,
@@ -49,7 +52,7 @@ class UserService
      * @return void
      * @throws \App\Exceptions\EmailAlreadyRegisteredException
      */
-    private function checkEmailAlreadyRegistered(string $email)
+    private function checkEmailAlreadyRegistered(string $email): void
     {
         if (User::whereEmail($email)->count() != 0) {
             throw new EmailAlreadyRegisteredException($email);
@@ -75,12 +78,15 @@ class UserService
         if ($role_id) {
             $user->role_id = $role_id;
         }
+        // It's Important Before updating user's data in DB to verify it matches his
+        // staffEmail data(role-email)
         $this->verifyUserMatchHisStaffEmail($user);
         return $this->performUpdate($user);
     }
 
     /**
-     *
+     *  Verifies that new user's role and email matches those assigned to him in
+     *  his StaffEmail.
      * @param \App\Models\User $user
      * @param integer $new_role_id
      * @return void
@@ -111,6 +117,7 @@ class UserService
     {
         if ($user->isDirty(["role_id", "email"])) {
             $user->tokens()->delete();
+            $user->refreshTokens()->delete();
         }
         if ($user->isDirty("email")) {
             $user->email_verified_at = null;
@@ -131,11 +138,12 @@ class UserService
         $this->verifyCanDeleteUser($user, $request_user);
 
         $user->tokens()->delete();
+        $user->refreshTokens()->delete();
         return $user->delete();
     }
 
     /**
-     * Returns whether the request_user have the permission to delete
+     * Returns whether the user requesting the delete have the permission to delete
      * the specified user.
      *
      * @param User $user_to_delete

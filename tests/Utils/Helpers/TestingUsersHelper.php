@@ -15,37 +15,33 @@ class TestingUsersHelper
     {
     }
 
-
     /**
      *
-     * @param boolean $grant_token
-     * @param boolean $store_token
+     * @param \Tests\Utils\Helpers\UserRole $role
+     * @param boolean $grant_access_token
+     * @param boolean $store_access_token
      * @return \App\Models\User
      */
-    public function createAdminUser(bool $grant_token = false, bool $store_token = false): User
-    {
-        return $this->createUserByRole('admin', $grant_token, $store_token);
-    }
-
-    /**
-     *
-     * @param string $role
-     * @param boolean $grant_token
-     * @param boolean $store_token
-     * @return \App\Models\User
-     */
-    private function createUserByRole(string $role, bool $grant_token = false, bool $store_token = false): User
-    {
+    public function createUserByRole(
+        UserRole $userRole,
+        bool $grant_access_token = false,
+        bool $store_access_token = false,
+        bool $store_refresh_token = false
+    ): User {
+        $role_slug = $userRole->value;
         $user = $this->userService->createNewUser(
-            $this->users_seeding_emails[$role],
-            'test ' . $role,
-            'password'
+            $this->users_seeding_emails[$role_slug],
+            "test " . $role_slug,
+            "password"
         );
-        if ($grant_token) {
-            $this->giveToken($user, [$role]);
+        if ($grant_access_token) {
+            $this->giveToken($user, [$role_slug]);
         }
-        if ($store_token) {
-            $this->createToken($user, [$role]);
+        if ($store_access_token) {
+            $this->createAccessToken($user, [$role_slug]);
+        }
+        if ($store_refresh_token) {
+            $this->createRefreshToken($user);
         }
         return $user;
     }
@@ -68,30 +64,21 @@ class TestingUsersHelper
      * @param array $abilities
      * @return void
      */
-    private function createToken(User $user, array $abilities = [])
+    private function createAccessToken(User $user, array $abilities = [])
     {
-        $user->createToken('test_token', $abilities)->plainTextToken;
+        $user->createToken("test_token", $abilities);
     }
 
-    /**
-     *
-     * @param boolean $grant_token
-     * @param boolean $store_token
-     * @return \App\Models\User
-     */
-    public function createDentistUser(bool $grant_token = false, bool $store_token = false): User
+    private function createRefreshToken(User $user)
     {
-        return $this->createUserByRole('dentist', $grant_token, $store_token);
+        $user->createRefreshToken("test_refresh_token");
     }
+}
 
-    /**
-     *
-     * @param boolean $grant_token
-     * @param boolean $store_token
-     * @return User
-     */
-    public function createSecretaryUser(bool $grant_token = false, bool $store_token = false): User
-    {
-        return $this->createUserByRole('secretary', $grant_token, $store_token);
-    }
+enum UserRole: string
+{
+    case admin = "admin";
+    case dentist = "dentist";
+    case secretary = "secretary";
+    case patient = "patient";
 }

@@ -66,8 +66,8 @@ class VerificationController extends Controller
 
         if ($user->hasVerifiedEmail()) {
             return $this->errorResponse(
-                JsonResponse::HTTP_UNPROCESSABLE_ENTITY,
-                new CustomError("user email already verified")
+                new CustomError("user email already verified"),
+                JsonResponse::HTTP_UNPROCESSABLE_ENTITY
             );
         }
         $user->markEmailAsVerified();

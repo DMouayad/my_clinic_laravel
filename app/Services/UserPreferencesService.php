@@ -11,8 +11,6 @@ use App\Exceptions\UserPreferencesAlreadyExistsException;
 
 class UserPreferencesService
 {
-
-
     /**
      *
      * @param integer $user_id
@@ -32,6 +30,7 @@ class UserPreferencesService
         $user_preferences->user_id = $user_id;
         $user_preferences->theme = $theme;
         $user_preferences->language = $language;
+
         if ($user_preferences->save()) {
             return $user_preferences;
         }
@@ -50,6 +49,11 @@ class UserPreferencesService
         $user_preferences->language = $language ?? $user_preferences->language;
         return $user_preferences->save();
     }
+    /**
+     *
+     * @param \App\Models\UserPreferences $user_preferences
+     * @return boolean
+     */
     public function delete(UserPreferences $user_preferences): bool
     {
         return $user_preferences->delete();

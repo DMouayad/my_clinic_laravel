@@ -124,8 +124,9 @@ class StaffEmailService
     {
         // NOTE:
         // Deleting the user before deleting the staffEmail is IMPORTANT due to:
-        // - having onDeleteCascade constraints on the 'staff_email_user' table
-        // which deletes the relationship between the user and staffEmail
+        // - onDeleteCascade constraints on the 'staff_email_user' table
+        // which deletes the relationship between the user and staffEmail.
+        // So we cannot find staffEmail's user if the staffEmail was deleted first.
         $staff_email->user()->delete();
         return $staff_email->delete();
     }

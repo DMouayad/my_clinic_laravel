@@ -2,9 +2,10 @@
 
 namespace Tests\Feature\Api\Auth;
 
+use App\Exceptions\CustomValidationException;
+use App\Exceptions\InvalidEmailCredentialException;
 use Database\Seeders\Utils\ProvidesUserSeedingData;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Symfony\Component\HttpFoundation\Response;
@@ -89,26 +90,7 @@ class LoginTest extends BaseApiRequestTestCase
         $this->assertRouteContainsMiddleware();
     }
 
-    function test_request_with_missing_email_returns_error()
-    {
-        $response = $this->makeRequest([
-            "password" => "password",
-            "device_id" => "randomDeviceId",
-        ]);
-        $response
-            ->assertJsonValidationErrors([
-                "email" => ["The email field is required."],
-            ])
-            ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
-            ->assertJson(
-                fn(AssertableJson $json) => $json
-                    ->has("errors", 1)
-                    ->has("errors.email")
-                    ->has("message")
-            );
-    }
-
-    function test_request_with_invalid_email_returns_error()
+    function test_request_with_invalid_email_returns_exception()
     {
         $response = $this->makeRequest(
             data: [
@@ -117,70 +99,38 @@ class LoginTest extends BaseApiRequestTestCase
                 "device_id" => "randomDeviceId",
             ]
         );
-        $response
-            ->assertStatus(Response::HTTP_UNAUTHORIZED)
-            ->assertJson(
-                fn(AssertableJson $json) => $json
-                    ->has("errors", 1)
-                    ->where("status", Response::HTTP_UNAUTHORIZED)
-            );
-    }
-
-    function test_request_with_missing_password_returns_error()
-    {
-        $response = $this->makeRequest(
-            data: Arr::only($this->getValidLoginData(), ["email", "device_id"])
+        $response->assertStatus(Response::HTTP_UNAUTHORIZED)->assertJson(
+            fn(AssertableJson $json) => $json
+                ->where(
+                    "error.exception",
+                    InvalidEmailCredentialException::className()
+                )
+                ->where("status", Response::HTTP_UNAUTHORIZED)
+                ->etc()
         );
-        $response
-            ->assertJsonValidationErrors([
-                "password" => ["The password field is required."],
-            ])
-            ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
-            ->assertJson(
-                fn(AssertableJson $json) => $json
-                    ->has("errors", 1)
-                    ->has("errors.password")
-                    ->has("message")
-            );
     }
 
-    function test_request_with_missing_data_returns_error()
+    function test_request_with_missing_data_returns_exception()
     {
         $response = $this->makeRequest();
-        $response
-            ->assertJsonValidationErrors([
-                "email" => ["The email field is required."],
-                "password" => ["The password field is required."],
-                "device_id" => ["The device id field is required."],
-            ])
-            ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
-            ->assertJson(
-                fn(AssertableJson $json) => $json
-                    ->has("errors", 3)
-                    ->hasAll([
-                        "errors.password",
-                        "errors.email",
-                        "errors.device_id",
-                    ])
-                    ->has("message")
-            );
-    }
 
-    function test_request_with_missing_deviceId()
-    {
-        $response = $this->makeRequest(
-            data: Arr::except($this->getValidLoginData(), "device_id")
-        );
         $response
-            ->assertJsonValidationErrors([
-                "device_id" => ["The device id field is required."],
-            ])
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJson(
                 fn(AssertableJson $json) => $json
-                    ->has("errors", 1)
-                    ->has("errors.device_id")
-                    ->has("message")
+                    ->where(
+                        "error.exception",
+                        CustomValidationException::className()
+                    )
+                    ->has(
+                        "error.description",
+                        fn(AssertableJson $message) => $message->hasAll([
+                            "email",
+                            "password",
+                            "device_id",
+                        ])
+                    )
+                    ->etc()
             );
     }
 }

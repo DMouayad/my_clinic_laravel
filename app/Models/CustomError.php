@@ -2,13 +2,16 @@
 
 namespace App\Models;
 
+/**
+ * Defines standard application error
+ */
 class CustomError
 {
     public function __construct(
         public string $message = "",
         public ?int $code = null,
         public ?string $exception = null,
-        public ?string $description = null
+        public string|array|null $description = null
     ) {
     }
 

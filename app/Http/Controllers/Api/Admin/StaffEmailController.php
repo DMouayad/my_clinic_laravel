@@ -21,8 +21,6 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Arr;
 use Symfony\Component\HttpFoundation\Response;
 
-//use Illuminate\Support\Facades\Response;
-
 class StaffEmailController extends Controller
 {
     use ProvidesResourcesJsonResponse,
@@ -66,7 +64,7 @@ class StaffEmailController extends Controller
      */
     public function store(Request $request)
     {
-        $params = $request->validate([
+        $params = $this->customValidate($request, [
             "email" => "required|email",
             "role" => "required|string",
         ]);
@@ -105,23 +103,25 @@ class StaffEmailController extends Controller
         StaffEmail $staffEmail,
         UserService $userService
     ) {
-        $params = $request->validate([
+        $params = $this->customValidate($request, [
             "email" => "nullable|email",
             "role" => "nullable|string",
         ]);
 
         if (!empty($params)) {
+            // update staffEmail with the provided data
             $updated_staff_email = $this->staffEmailService->update(
                 $staffEmail,
                 strtolower(Arr::get($params, "email", default: null)),
                 strtolower(Arr::get($params, "role", default: null))
             );
+            // then update staffEmail's user data
             $updated_user = $userService->update(
                 user: $updated_staff_email->user,
                 role_id: $updated_staff_email->role_id,
                 email: $updated_staff_email->email
             );
-
+            // check user data was updated successfully
             $user_was_updated = $updated_staff_email->user == $updated_user;
             if ($user_was_updated) {
                 return $this->successResponse(
@@ -147,7 +147,7 @@ class StaffEmailController extends Controller
             return $this->successResponse(message: "Deleted successfully");
         } else {
             return $this->errorResponse(
-                errors: new CustomError("Failed to delete the Staff email")
+                new CustomError("Failed to delete the Staff email")
             );
         }
     }

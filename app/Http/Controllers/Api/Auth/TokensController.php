@@ -22,8 +22,8 @@ class TokensController extends Controller
         $user = $refresh_token->tokenable;
         if (!$user) {
             return $this->errorResponse(
-                Response::HTTP_UNAUTHORIZED,
                 new CustomError("user not found!")
+                , Response::HTTP_UNAUTHORIZED,
             );
         }
         $user->deleteDeviceTokens($device_id);

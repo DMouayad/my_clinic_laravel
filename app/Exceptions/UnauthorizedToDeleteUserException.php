@@ -2,10 +2,13 @@
 
 namespace App\Exceptions;
 
+use App\Traits\ProvidesClassName;
 use Symfony\Component\HttpFoundation\Response;
 
 class UnauthorizedToDeleteUserException extends CustomException
 {
+    use ProvidesClassName;
+
     /**
      * Render the exception into an HTTP response.
      *

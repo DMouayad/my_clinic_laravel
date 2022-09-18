@@ -3,6 +3,7 @@
 namespace Tests\Feature\Api\Auth;
 
 use App\Exceptions\EmailAlreadyRegisteredException;
+use App\Exceptions\EmailUnauthorizedToRegisterException;
 use App\Http\Middleware\EnsureStaffEmailProvided;
 use App\Services\UserService;
 use Database\Seeders\Utils\ProvidesUserSeedingData;
@@ -13,6 +14,7 @@ use Illuminate\Testing\Fluent\AssertableJson;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\Utils\BaseApiRequestTestCase;
 use Tests\Utils\Helpers\TestingUsersHelper;
+use Tests\Utils\Helpers\UserRole;
 use Tests\Utils\RolesAndStaffEmailDBSeeders;
 
 class RegisterTest extends BaseApiRequestTestCase
@@ -40,22 +42,22 @@ class RegisterTest extends BaseApiRequestTestCase
     {
         $response = $this->makeRequest(data: $this->getValidRegistrationData());
         $response->assertStatus(Response::HTTP_CREATED)->assertJson(
-            fn (AssertableJson $json) => $json
+            fn(AssertableJson $json) => $json
                 ->where("status", Response::HTTP_CREATED)
                 ->has("message")
                 ->has(
                     "data",
-                    fn ($data) => $data
+                    fn($data) => $data
                         ->hasAll(["user", "refresh_token", "access_token"])
                         ->has(
                             "access_token",
-                            fn (AssertableJson $accessToken) => $accessToken
+                            fn(AssertableJson $accessToken) => $accessToken
                                 ->whereType("token", "string")
                                 ->has("expires_at")
                         )
                         ->has(
                             "user",
-                            fn ($user) => $user
+                            fn($user) => $user
                                 ->where("id", 1)
                                 ->where("name", "testName")
                                 ->hasAll([
@@ -90,17 +92,17 @@ class RegisterTest extends BaseApiRequestTestCase
                 Arr::except($this->getValidRegistrationData(), "email"),
             ]
         );
-        $response->assertForbidden()->assertJson(
-            fn (AssertableJson $json) => $json
-                ->where("status", Response::HTTP_FORBIDDEN)
-                ->has("errors", 1)
-                ->has(
-                    "errors.0",
-                    fn (AssertableJson $error) => $error
-                        ->whereNot("message", null)
-                        ->etc()
-                )
-        );
+        // assert an exception is returned
+        $response
+            ->assertForbidden()
+            ->assertJson(
+                fn(AssertableJson $json) => $json
+                    ->where("status", Response::HTTP_FORBIDDEN)
+                    ->where(
+                        "error.exception",
+                        EmailUnauthorizedToRegisterException::className()
+                    )
+            );
     }
 
     function test_request_by_unauthorized_user()
@@ -117,7 +119,10 @@ class RegisterTest extends BaseApiRequestTestCase
     private function createAdminUser()
     {
         $testing_users_helper = new TestingUsersHelper(new UserService());
-        return $testing_users_helper->createAdminUser(grant_token: true);
+        return $testing_users_helper->createUserByRole(
+            UserRole::admin,
+            grant_access_token: true
+        );
     }
 
     function test_route_has_specified_middleware()
@@ -131,15 +136,12 @@ class RegisterTest extends BaseApiRequestTestCase
             Arr::except($this->getValidRegistrationData(), "email")
         );
         $response
-            ->assertJsonValidationErrors([
-                "email" => ["The email field is required."],
-            ])
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJson(
-                fn (AssertableJson $json) => $json
-                    ->has("errors", 1)
-                    ->has("errors.email")
-                    ->has("message")
+                fn(AssertableJson $json) => $json
+                    ->where("status", Response::HTTP_UNPROCESSABLE_ENTITY)
+                    ->has("error.description.email")
+                    ->etc()
             );
     }
 
@@ -149,14 +151,11 @@ class RegisterTest extends BaseApiRequestTestCase
             data: Arr::except($this->getValidRegistrationData(), "name")
         );
         $response
-            ->assertJsonValidationErrors([
-                "name" => ["The name field is required."],
-            ])
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJson(
-                fn (AssertableJson $json) => $json
-                    ->has("errors", 1)
-                    ->has("message")
+                fn(AssertableJson $json) => $json
+                    ->has("error.description.name")
+                    ->etc()
             );
     }
 
@@ -167,15 +166,11 @@ class RegisterTest extends BaseApiRequestTestCase
         );
 
         $response
-            ->assertJsonValidationErrors([
-                "password" => ["The password field is required."],
-            ])
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJson(
-                fn (AssertableJson $json) => $json
-                    ->has("errors", 1)
-                    ->has("errors.password")
-                    ->has("message")
+                fn(AssertableJson $json) => $json
+                    ->has("error.description.password")
+                    ->etc()
             );
     }
 
@@ -185,31 +180,11 @@ class RegisterTest extends BaseApiRequestTestCase
             data: Arr::except($this->getValidRegistrationData(), "device_id")
         );
         $response
-            ->assertJsonValidationErrors([
-                "device_id" => ["The device id field is required."],
-            ])
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJson(
-                fn (AssertableJson $json) => $json
-                    ->has("errors", 1)
-                    ->has("errors.device_id")
-                    ->has("message")
-            );
-    }
-
-    function test_request_with_missing_data_returns_error()
-    {
-        $response = $this->makeRequest();
-        $response
-            ->assertJsonValidationErrors([
-                "email" => ["The email field is required."],
-            ])
-            ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
-            ->assertJson(
-                fn (AssertableJson $json) => $json
-                    ->has("errors", 1)
-                    ->has("errors.email")
-                    ->has("message")
+                fn(AssertableJson $json) => $json
+                    ->has("error.description.device_id")
+                    ->etc()
             );
     }
 
@@ -220,11 +195,11 @@ class RegisterTest extends BaseApiRequestTestCase
         // register again
         $response = $this->makeRequest($this->getValidRegistrationData());
         $response->assertJson(
-            fn (AssertableJson $json) => $json
+            fn(AssertableJson $json) => $json
                 ->where("status", Response::HTTP_CONFLICT)
                 ->has(
-                    "errors.0",
-                    fn (AssertableJson $error) => $error
+                    "error",
+                    fn(AssertableJson $error) => $error
                         ->where(
                             "exception",
                             EmailAlreadyRegisteredException::className()

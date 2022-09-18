@@ -68,7 +68,7 @@ class UpdateStaffEmailTest extends BaseStaffEmailApiRequestTest
         $response->assertStatus(Response::HTTP_BAD_REQUEST);
     }
 
-    public function test_authorized_request_with_already_existing_email()
+    public function test_authorized_request_with_already_existing_email_returns_exception()
     {
         $this->setRouteParameters([
             "staff_email" => $this->dentist_staffEmail_id,
@@ -82,24 +82,18 @@ class UpdateStaffEmailTest extends BaseStaffEmailApiRequestTest
             "admin",
             $already_seeded_data
         );
-        $response
-            ->assertStatus(Response::HTTP_CONFLICT)
-            ->assertJson(
-                fn(AssertableJson $json) => $json
-                    ->where("status", Response::HTTP_CONFLICT)
-                    ->has(
-                        "errors.0",
-                        fn(AssertableJson $error) => $error
-                            ->where(
-                                "exception",
-                                StaffEmailAlreadyExistsException::className()
-                            )
-                            ->etc()
-                    )
-            );
+        $response->assertStatus(Response::HTTP_CONFLICT)->assertJson(
+            fn(AssertableJson $json) => $json
+                ->where("status", Response::HTTP_CONFLICT)
+                ->where(
+                    "error.exception",
+                    StaffEmailAlreadyExistsException::className()
+                )
+                ->etc()
+        );
     }
 
-    public function test_authorized_request_with_invalid_role()
+    public function test_authorized_request_with_invalid_role_returns_exception()
     {
         $invalid_data = [
             "email" => "testEmail@gmail.com",
@@ -117,15 +111,11 @@ class UpdateStaffEmailTest extends BaseStaffEmailApiRequestTest
             ->assertJson(
                 fn(AssertableJson $json) => $json
                     ->where("status", Response::HTTP_UNPROCESSABLE_ENTITY)
-                    ->has(
-                        "errors.0",
-                        fn(AssertableJson $error) => $error
-                            ->where(
-                                "exception",
-                                RoleNotFoundException::className()
-                            )
-                            ->etc()
+                    ->where(
+                        "error.exception",
+                        RoleNotFoundException::className()
                     )
+                    ->etc()
             );
     }
 }

@@ -2,10 +2,10 @@
 
 namespace App\Exceptions;
 
-use Exception;
 use App\Traits\ProvidesApiJsonResponse;
+use Exception;
 
-class CustomException extends Exception
+abstract class CustomException extends Exception
 {
     use ProvidesApiJsonResponse, ProvidesClassName;
 }

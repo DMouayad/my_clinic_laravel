@@ -5,6 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
 
+/**
+ * Represents a clinic's staff email address and role.
+ * 
+ * Users with a staff role (dentist-secretary-admin) cannot register without providing an already 
+ * saved StaffEmail.
+ */
 class StaffEmail extends Model
 {
     protected $fillable = ['email', 'role_id'];

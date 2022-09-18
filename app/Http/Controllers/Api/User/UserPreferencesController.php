@@ -32,7 +32,7 @@ class UserPreferencesController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $validated = $this->customValidate($request, [
             "user_id" => "integer|required",
             "theme" => "string|nullable",
             "language" => "string|nullable",
@@ -50,7 +50,7 @@ class UserPreferencesController extends Controller
             );
         } else {
             return $this->errorResponse(
-                errors: new CustomError("user preferences were not saved!")
+                error: new CustomError("user preferences were not saved!")
             );
         }
     }
@@ -75,7 +75,7 @@ class UserPreferencesController extends Controller
      */
     public function update(Request $request)
     {
-        $input = $request->validate([
+        $input = $this->customValidate($request, [
             "theme" => "string|nullable",
             "language" => "string|nullable",
         ]);
@@ -90,7 +90,7 @@ class UserPreferencesController extends Controller
             );
         } else {
             return $this->errorResponse(
-                errors: new CustomError(
+                error: new CustomError(
                     "Failed to update the preferences of user with id " .
                         $request->user()->id
                 )

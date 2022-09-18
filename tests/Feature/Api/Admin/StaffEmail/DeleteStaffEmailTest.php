@@ -39,7 +39,7 @@ class DeleteStaffEmailTest extends BaseStaffEmailApiRequestTest
         $this->setRouteParameters(["staff_email" => 2]);
         $response = $this->makeRequestAuthorizedByUserAbility("admin");
         $response->assertStatus(Response::HTTP_OK)->assertJson(
-            fn (AssertableJson $json) => $json
+            fn(AssertableJson $json) => $json
                 ->where("data", null)
                 ->where("status", Response::HTTP_OK)
                 ->missing("errors")
@@ -56,37 +56,34 @@ class DeleteStaffEmailTest extends BaseStaffEmailApiRequestTest
 
     public function test_authorized_request_with_invalid_staffEmail_id()
     {
+        // add the id of to-be-deleted StaffEmail as a parameter in request url
         $this->setRouteParameters([
             "staff_email" => "NotAnID-Or-IDForNonExistingInstance",
         ]);
 
         $response = $this->makeRequestAuthorizedByUserAbility("admin");
         $response->assertStatus(Response::HTTP_NOT_FOUND)->assertJson(
-            fn (AssertableJson $json) => $json
+            fn(AssertableJson $json) => $json
                 ->where("exception", NotFoundHttpException::class)
                 ->has("message")
                 ->etc()
         );
     }
 
-    public function test_authorized_request_of_deleting_the_only_admin_staffEmail()
+    public function test_deleting_the_only_admin_staffEmail_returns_exception()
     {
+        // add the id of to-be-deleted StaffEmail as a parameter in request url
         $this->setRouteParameters(["staff_email" => 1]);
 
         $response = $this->makeRequestAuthorizedByUserAbility("admin");
-        $response
-            ->assertStatus(Response::HTTP_CONFLICT)
-            ->assertJson(
-                fn (AssertableJson $json) => $json
-                    ->where("status", Response::HTTP_CONFLICT)
-                    ->has(
-                        "errors.0",
-                        fn (AssertableJson $error) => $error
-                            ->where(
-                                "exception",
-                                DeletingOnlyAdminStaffEmailException::className()
-                            )->etc()
-                    )
-            );
+        $response->assertStatus(Response::HTTP_CONFLICT)->assertJson(
+            fn(AssertableJson $json) => $json
+                ->where("status", Response::HTTP_CONFLICT)
+                ->where(
+                    "error.exception",
+                    DeletingOnlyAdminStaffEmailException::className()
+                )
+                ->etc()
+        );
     }
 }

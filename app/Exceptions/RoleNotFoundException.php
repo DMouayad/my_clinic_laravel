@@ -2,18 +2,21 @@
 
 namespace App\Exceptions;
 
-use App\Exceptions\CustomException;
+use App\Traits\ProvidesClassName;
 use Illuminate\Http\JsonResponse;
 
 class RoleNotFoundException extends CustomException
 {
+    use ProvidesClassName;
+
     public function __construct(private string $role_slug)
     {
     }
+
     /**
      * Render the exception into an HTTP response.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function render($request)

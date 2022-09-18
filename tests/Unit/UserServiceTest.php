@@ -9,6 +9,7 @@ use App\Services\UserService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use Tests\Utils\Helpers\TestingUsersHelper;
+use Tests\Utils\Helpers\UserRole;
 use Tests\Utils\RolesAndStaffEmailDBSeeders;
 
 class UserServiceTest extends TestCase
@@ -22,13 +23,13 @@ class UserServiceTest extends TestCase
 
     public function test_create_user_with_valid_credentials()
     {
-        $user = $this->helper->createAdminUser();
+        $user = $this->helper->createUserByRole(UserRole::admin);
         $this->assertModelExists($user);
     }
 
     public function test_creating_user_creates_staff_email_user()
     {
-        $user = $this->helper->createAdminUser();
+        $user = $this->helper->createUserByRole(UserRole::admin);
         $this->assertDatabaseHas("staff_email_user", [
             "user_id" => $user->id,
             "staff_email_id" => $user->staffEmail->id,
@@ -38,16 +39,17 @@ class UserServiceTest extends TestCase
     public function test_creating_user_with_existing_email_throws_exception()
     {
         $this->assertThrows(function () {
-            $this->helper->createAdminUser();
-            $this->helper->createAdminUser();
+            $this->helper->createUserByRole(UserRole::admin);
+            $this->helper->createUserByRole(UserRole::admin);
         }, EmailAlreadyRegisteredException::class);
     }
 
     public function test_updating_user_role_and_email()
     {
+        $user = $this->helper->createUserByRole(UserRole::admin);
         $new_email = "updatedEmail@myclinic.com";
-        $user = $this->helper->createAdminUser();
-        // user's staffEmail must be updated before updating the user
+        // user's staffEmail must be updated before updating the user, otherwise,
+        // UserDoesntMatchHisStaffEmailException will be thrown
         $user->staffEmail->update(["email" => $new_email, "role_id" => 2]);
         $updated = $this->userService->update($user, 2, $new_email);
         // assert user date was updated in the db
@@ -62,7 +64,7 @@ class UserServiceTest extends TestCase
     {
         $this->assertThrows(function () {
             $new_role_id = 2;
-            $user = $this->helper->createAdminUser();
+            $user = $this->helper->createUserByRole(UserRole::admin);
             $this->userService->update($user, role_id: $new_role_id);
         }, UserDoesntMatchHisStaffEmailException::class);
     }
@@ -71,7 +73,7 @@ class UserServiceTest extends TestCase
     {
         $this->assertThrows(function () {
             $new_email = "newEmail@myclinic.com";
-            $user = $this->helper->createAdminUser();
+            $user = $this->helper->createUserByRole(UserRole::admin);
             $this->userService->update($user, email: $new_email);
         }, UserDoesntMatchHisStaffEmailException::class);
     }
@@ -79,8 +81,8 @@ class UserServiceTest extends TestCase
     public function test_updating_user_email_throws_exception_if_already_exists()
     {
         $this->assertThrows(function () {
-            $user1 = $this->helper->createDentistUser();
-            $user2 = $this->helper->createSecretaryUser();
+            $user1 = $this->helper->createUserByRole(UserRole::dentist);
+            $user2 = $this->helper->createUserByRole(UserRole::secretary);
             $this->userService->update($user1, email: $user2->email);
         }, EmailAlreadyRegisteredException::class);
     }
@@ -88,7 +90,10 @@ class UserServiceTest extends TestCase
     public function test_updating_user_email_revokes_his_tokens()
     {
         $new_email = "updatedEmail@myclinic.com";
-        $user = $this->helper->createAdminUser(store_token: true);
+        $user = $this->helper->createUserByRole(
+            UserRole::admin,
+            store_access_token: true
+        );
         // assert user has one access token
         $this->assertSame(1, $user->tokens->count());
 
@@ -104,10 +109,15 @@ class UserServiceTest extends TestCase
 
     public function test_updating_user_role_revokes_his_tokens()
     {
-        $user = $this->helper->createAdminUser(store_token: true);
+        $user = $this->helper->createUserByRole(
+            UserRole::admin,
+            store_access_token: true,
+            store_refresh_token: true
+        );
 
         // assert user has one access token
         $this->assertSame(1, $user->tokens->count());
+        $this->assertSame(1, $user->refreshTokens->count());
 
         $user->staffEmail->update(["role_id" => 2]);
         // updates user's email and role_id
@@ -116,11 +126,12 @@ class UserServiceTest extends TestCase
         $updated = $updated->fresh();
         // expects user's tokens have been deleted.
         $this->assertSame(0, $updated->tokens->count());
+        $this->assertSame(0, $updated->refreshTokens->count());
     }
 
     public function test_user_can_delete_his_account()
     {
-        $user = $this->helper->createDentistUser();
+        $user = $this->helper->createUserByRole(UserRole::dentist);
         $this->userService->delete($user, $user);
         $this->assertModelMissing($user);
     }
@@ -128,16 +139,19 @@ class UserServiceTest extends TestCase
     public function test_deleting_user_throws_exception_if_not_by_admin_or_himself()
     {
         $this->assertThrows(function () {
-            $user1 = $this->helper->createDentistUser();
-            $user2 = $this->helper->createSecretaryUser();
+            $user1 = $this->helper->createUserByRole(UserRole::dentist);
+            $user2 = $this->helper->createUserByRole(UserRole::secretary);
             $this->userService->delete($user1, $user2);
         }, UnauthorizedToDeleteUserException::class);
     }
 
     public function test_admin_can_delete_other_users()
     {
-        $admin = $this->helper->createAdminUser(grant_token: true);
-        $user = $this->helper->createSecretaryUser();
+        $admin = $this->helper->createUserByRole(
+            UserRole::admin,
+            grant_access_token: true
+        );
+        $user = $this->helper->createUserByRole(UserRole::secretary);
 
         $this->userService->delete($user, $admin);
         // expect $user to be deleted from db
@@ -146,9 +160,25 @@ class UserServiceTest extends TestCase
 
     public function test_deleting_user_will_delete_his_tokens()
     {
-        $user = $this->helper->createDentistUser(store_token: true);
+        $user = $this->helper->createUserByRole(
+            UserRole::admin,
+            store_access_token: true,
+            store_refresh_token: true
+        );
+        // assert tokens exists before deleting the user
+        $this->assertDatabaseHas("personal_access_tokens", [
+            "tokenable_id" => $user->id,
+        ]);
+        $this->assertDatabaseHas("refresh_tokens", [
+            "tokenable_id" => $user->id,
+        ]);
+        // perform delete
         $this->userService->delete($user, $user);
+        // assert tokens was deleted
         $this->assertDatabaseMissing("personal_access_tokens", [
+            "tokenable_id" => $user->id,
+        ]);
+        $this->assertDatabaseMissing("refresh_tokens", [
             "tokenable_id" => $user->id,
         ]);
     }

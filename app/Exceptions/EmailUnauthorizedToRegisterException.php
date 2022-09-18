@@ -2,18 +2,12 @@
 
 namespace App\Exceptions;
 
-
 use App\Traits\ProvidesClassName;
-use Illuminate\Http\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 
-
-class StaffEmailAlreadyExistsException extends CustomException
+class EmailUnauthorizedToRegisterException extends CustomException
 {
     use ProvidesClassName;
-
-    public function __construct(private string $email)
-    {
-    }
 
     /**
      * Render the exception into an HTTP response.
@@ -21,12 +15,16 @@ class StaffEmailAlreadyExistsException extends CustomException
      * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\JsonResponse
      */
+    public function __construct(private string $email)
+    {
+    }
+
     public function render($request)
     {
         return $this->errorResponseFromException(
             $this,
-            'Email address (' . $this->email . ') already exists!',
-            JsonResponse::HTTP_CONFLICT
+            "The email address (" . $this->email . ") is not allowed to register.",
+            Response::HTTP_FORBIDDEN,
         );
     }
 }

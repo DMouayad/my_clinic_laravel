@@ -28,7 +28,7 @@ class GetMyInfoTest extends BaseUsersApiRequestTest
                     )->missing('role')
                 )
                 ->where("status", Response::HTTP_OK)
-                ->where("errors", null)
+                ->where("error", null)
         );
     }
 }

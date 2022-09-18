@@ -16,29 +16,38 @@ class GetOnlyStaffUsersTest extends BaseUserApiRequestTest
     {
         return "get-staff-users";
     }
-    private $seeded_users_count = 3;
+
     function test_authorized_request()
     {
         $response = $this->makeRequestAuthorizedByUserAbility("admin");
         $response->assertStatus(Response::HTTP_OK)->assertJson(
-            fn (AssertableJson $json) => $json
+            fn(AssertableJson $json) => $json
                 ->has(
-                    'data.0',
-                    fn ($userJson) => $userJson->hasAll([
-                        'id', 'email', 'role', 'created_at', 'updated_at'
-                    ])->etc()
+                    "data.0",
+                    fn($userJson) => $userJson
+                        ->hasAll([
+                            "id",
+                            "email",
+                            "role",
+                            "created_at",
+                            "updated_at",
+                        ])
+                        ->etc()
                 )
                 ->has(
-                    'data.0',
-                    fn (AssertableJson $userJson) => $userJson->has(
-                        'role',
-                        fn (AssertableJson $roleJson) =>
-                        $roleJson->whereNot('name', 'Patient')->whereNot('slug', 'patient')
-                    )->etc()
+                    "data.0",
+                    fn(AssertableJson $userJson) => $userJson
+                        ->has(
+                            "role",
+                            fn(AssertableJson $roleJson) => $roleJson
+                                ->whereNot("name", "Patient")
+                                ->whereNot("slug", "patient")
+                        )
+                        ->etc()
                 )
                 ->where("status", Response::HTTP_OK)
-                ->where("total", $this->seeded_users_count)
-                ->where("errors", null)
+                ->where("total", config("my_clinic.seeded_staff_users_count"))
+                ->where("error", null)
         );
     }
 }

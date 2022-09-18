@@ -31,12 +31,15 @@ class RegisterController extends Controller
      * @param UserService $userService
      * @return JsonResponse
      * @throws \App\Exceptions\EmailAlreadyRegisteredException
+     * @throws \App\Exceptions\CustomValidationException
      */
     public function register(
-        Request $request,
+        Request     $request,
         UserService $userService
-    ): JsonResponse {
-        $params = $request->validate([
+    ): JsonResponse
+    {
+        $params = $this->customValidate(
+            $request, [
             "name" => "required|string",
             "email" => "required|email",
             "password" => "required|string",

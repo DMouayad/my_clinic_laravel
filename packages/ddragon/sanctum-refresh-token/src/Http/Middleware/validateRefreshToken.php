@@ -4,6 +4,7 @@ namespace DDragon\SanctumRefreshToken\Http\Middleware;
 
 use Closure;
 use DDragon\SanctumRefreshToken\HasRefreshTokens;
+use DDragon\SanctumRefreshToken\ProvidesCustomRequestValidator;
 use DDragon\SanctumRefreshToken\RefreshToken;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\JsonResponse;
@@ -12,6 +13,8 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ValidateRefreshToken
 {
+    use ProvidesCustomRequestValidator;
+
     /**
      * Handle an incoming request.
      *
@@ -21,7 +24,7 @@ class ValidateRefreshToken
      */
     public function handle(Request $request, Closure $next)
     {
-        $params = $request->validate([
+        $params = $this->customValidate($request, [
             "device_id" => "required|string",
         ]);
         $device_id = $params["device_id"];

@@ -6,6 +6,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class DeleteUserTest extends BaseUserApiRequestTest
 {
+    // IDs depend on the order of seeding the users
     private int $seeded_dentist_id = 2;
     private int $seeded_secretary_id = 3;
 

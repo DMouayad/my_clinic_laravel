@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Api\Admin\Users;
 
-use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Testing\Fluent\AssertableJson;
+use Symfony\Component\HttpFoundation\Response;
 
 class GetAllUsersTest extends BaseUserApiRequestTest
 {
@@ -21,17 +21,24 @@ class GetAllUsersTest extends BaseUserApiRequestTest
     {
         $response = $this->makeRequestAuthorizedByUserAbility("admin");
         $response->assertStatus(Response::HTTP_OK)->assertJson(
-            fn (AssertableJson $json) => $json
-                ->has("data", 3)
+            fn(AssertableJson $json) => $json
+                ->has("data", config("my_clinic.seeded_users_count"))
                 ->has(
-                    'data.0',
-                    fn (AssertableJson $userJson) => $userJson->hasAll([
-                        'id', 'email', 'role', 'created_at', 'updated_at'
-                    ])->etc()
+                    "data.0",
+                    fn(AssertableJson $userJson) => $userJson
+                        ->hasAll([
+                            "id",
+                            "email",
+                            "role",
+                            "created_at",
+                            "updated_at",
+                        ])
+                        // the presence of "email_verified_at" field depends on whether the user's email is verified or not
+                        ->etc()
                 )
                 ->where("status", Response::HTTP_OK)
-                ->where("total", 3)
-                ->where("errors", null)
+                ->where("total", config("my_clinic.seeded_users_count"))
+                ->where("error", null)
         );
     }
 }
