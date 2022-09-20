@@ -28,6 +28,7 @@ class GetOnlyStaffUsersTest extends BaseUserApiRequestTest
                         ->hasAll([
                             "id",
                             "email",
+                            "phone_number",
                             "role",
                             "created_at",
                             "updated_at",

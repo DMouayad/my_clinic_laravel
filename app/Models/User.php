@@ -24,7 +24,7 @@ class User extends Authenticatable implements MustVerifyEmail
      *
      * @var array<int, string>
      */
-    protected $fillable = ["name", "email", "password", "role_id"];
+    protected $fillable = ["name", "email", "password", "role_id", "phone_number"];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -41,6 +41,7 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $casts = [
         "email_verified_at" => "datetime",
     ];
+
     /**
      * Check if there's a user with the provided ID
      *
@@ -107,10 +108,11 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         $this->notify(new SendQueuedEmailVerificationNotification());
     }
+
     /**
-     * deletes any previous personal access token and refresh tokens for 
+     * deletes any previous personal access token and refresh tokens for
      * the specified device id
-     * 
+     *
      * @param string $device_id
      * @return void
      */

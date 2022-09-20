@@ -30,6 +30,7 @@ class GetAllUsersTest extends BaseUserApiRequestTest
                             "id",
                             "email",
                             "role",
+                            "phone_number",
                             "created_at",
                             "updated_at",
                         ])

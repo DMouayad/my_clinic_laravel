@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use App\Exceptions\EmailAlreadyRegisteredException;
+use App\Exceptions\PhoneNumberAlreadyUsedException;
 use App\Exceptions\UnauthorizedToDeleteUserException;
 use App\Exceptions\UserDoesntMatchHisStaffEmailException;
 use App\Services\UserService;
@@ -44,20 +45,43 @@ class UserServiceTest extends TestCase
         }, EmailAlreadyRegisteredException::class);
     }
 
-    public function test_updating_user_role_and_email()
+    public function test_updating_user_data()
     {
         $user = $this->helper->createUserByRole(UserRole::admin);
         $new_email = "updatedEmail@myclinic.com";
+        $new_phone_number = "newPhoneNumber";
         // user's staffEmail must be updated before updating the user, otherwise,
         // UserDoesntMatchHisStaffEmailException will be thrown
-        $user->staffEmail->update(["email" => $new_email, "role_id" => 2]);
-        $updated = $this->userService->update($user, 2, $new_email);
+        $user->staffEmail->update([
+            "email" => $new_email,
+            "role_id" => 2,
+            "phone_number" => $new_phone_number,
+        ]);
+        $updated = $this->userService->update(
+            $user,
+            2,
+            $new_email,
+            $new_phone_number
+        );
         // assert user date was updated in the db
         $this->assertDatabaseHas("users", [
             "id" => $updated->id,
             "role_id" => $updated->role_id,
             "email" => $new_email,
+            "phone_number" => $new_phone_number,
         ]);
+    }
+
+    public function test_updating_user_phoneNo_with_one_already_used_throws_exception()
+    {
+        $this->assertThrows(function () {
+            $user1 = $this->helper->createUserByRole(UserRole::dentist);
+            $user2 = $this->helper->createUserByRole(UserRole::secretary);
+            $this->userService->update(
+                $user1,
+                phone_number: $user2->phone_number
+            );
+        }, PhoneNumberAlreadyUsedException::class);
     }
 
     public function test_updating_user_with_role_different_from_his_staffEmail_throws_exception()

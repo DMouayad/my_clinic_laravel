@@ -63,6 +63,7 @@ class RegisterTest extends BaseApiRequestTestCase
                                 ->hasAll([
                                     "email",
                                     "role",
+                                    "phone_number",
                                     "created_at",
                                     "updated_at",
                                 ])
@@ -78,6 +79,7 @@ class RegisterTest extends BaseApiRequestTestCase
         return [
             "email" => $this->users_seeding_emails["admin"],
             "name" => "testName",
+            "phone_number" => $this->getRandomPhoneNum(),
             "password" => $this->default_password,
             "device_id" => Str::random(),
         ];

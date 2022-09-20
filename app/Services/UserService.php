@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Exceptions\EmailAlreadyRegisteredException;
+use App\Exceptions\PhoneNumberAlreadyUsedException;
 use App\Exceptions\UnauthorizedToDeleteUserException;
 use App\Exceptions\UserDoesntMatchHisStaffEmailException;
 use App\Models\StaffEmail;
@@ -20,19 +21,24 @@ class UserService
      *
      * @param string $email
      * @param string $name
+     * @param string $phone_number
      * @param string $password
      * @return \App\Models\User
      * @throws \App\Exceptions\EmailAlreadyRegisteredException
+     * @throws \App\Exceptions\PhoneNumberAlreadyUsedException
      */
     public function createNewUser(
         string $email,
         string $name,
+        string $phone_number,
         string $password
     ): User {
         $this->checkEmailAlreadyRegistered($email);
+        $this->verifyPhoneNumberIsUnique($phone_number);
         $user = User::create([
             "email" => $email,
             "name" => $name,
+            "phone_number" => $phone_number,
             "password" => Hash::make($password),
             "role_id" => StaffEmail::whereEmail($email)->first(["role_id"])
                 ->role_id,
@@ -60,16 +66,32 @@ class UserService
     }
 
     /**
+     * @param string $phone_number
+     * @return void
+     * @throws \App\Exceptions\PhoneNumberAlreadyUsedException
+     */
+    private function verifyPhoneNumberIsUnique(string $phone_number): void
+    {
+        if (User::where("phone_number", $phone_number)->count() != 0) {
+            throw new PhoneNumberAlreadyUsedException($phone_number);
+        }
+    }
+
+    /**
      * @param User $user
      * @param int|null $role_id
      * @param string|null $email
+     * @param string|null $phone_number
      * @return \App\Models\User
-     * @throws EmailAlreadyRegisteredException|UserDoesntMatchHisStaffEmailException
+     * @throws EmailAlreadyRegisteredException
+     * @throws UserDoesntMatchHisStaffEmailException
+     * @throws PhoneNumberAlreadyUsedException
      */
     public function update(
         User $user,
         int|null $role_id = null,
-        string|null $email = null
+        string|null $email = null,
+        string|null $phone_number = null
     ): User {
         if ($email && $user->email != $email) {
             $this->checkEmailAlreadyRegistered($email);
@@ -77,6 +99,10 @@ class UserService
         }
         if ($role_id) {
             $user->role_id = $role_id;
+        }
+        if ($phone_number) {
+            $this->verifyPhoneNumberIsUnique($phone_number);
+            $user->phone_number = $phone_number;
         }
         // It's Important Before updating user's data in DB to verify it matches his
         // staffEmail data(role-email)

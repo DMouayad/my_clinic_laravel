@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api\User;
 
+use Illuminate\Testing\Fluent\AssertableJson;
 use Symfony\Component\HttpFoundation\Response;
 
 class GetMyInfoTest extends BaseUsersApiRequestTest
@@ -20,12 +21,21 @@ class GetMyInfoTest extends BaseUsersApiRequestTest
     {
         $response = $this->makeRequestAuthorizedByUserAbility("admin");
         $response->assertStatus(Response::HTTP_OK)->assertJson(
-            fn ($json) => $json
+            fn($json) => $json
                 ->has(
                     "data",
-                    fn ($userJson) => $userJson->hasAll(
-                        ['id', 'email', 'preferences', 'created_at', 'updated_at', 'email_verified_at']
-                    )->missing('role')
+                    fn(AssertableJson $userJson) => $userJson
+                        ->hasAll([
+                            "id",
+                            "email",
+                            "preferences",
+                            "created_at",
+                            "updated_at",
+                            "phone_number",
+                        ])
+                        ->missing("role")
+                        // might have email_verified_at
+                        ->etc()
                 )
                 ->where("status", Response::HTTP_OK)
                 ->where("error", null)

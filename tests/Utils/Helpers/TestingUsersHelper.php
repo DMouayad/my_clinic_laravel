@@ -5,6 +5,7 @@ namespace Tests\Utils\Helpers;
 use App\Models\User;
 use App\Services\UserService;
 use Database\Seeders\Utils\ProvidesUserSeedingData;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
 class TestingUsersHelper
@@ -17,9 +18,10 @@ class TestingUsersHelper
 
     /**
      *
-     * @param \Tests\Utils\Helpers\UserRole $role
+     * @param \Tests\Utils\Helpers\UserRole $userRole
      * @param boolean $grant_access_token
      * @param boolean $store_access_token
+     * @param bool $store_refresh_token
      * @return \App\Models\User
      */
     public function createUserByRole(
@@ -30,9 +32,10 @@ class TestingUsersHelper
     ): User {
         $role_slug = $userRole->value;
         $user = $this->userService->createNewUser(
-            $this->users_seeding_emails[$role_slug],
-            "test " . $role_slug,
-            "password"
+            email: $this->users_seeding_emails[$role_slug],
+            name: "test " . $role_slug,
+            password: "password",
+            phone_number: Str::random(9)
         );
         if ($grant_access_token) {
             $this->giveToken($user, [$role_slug]);

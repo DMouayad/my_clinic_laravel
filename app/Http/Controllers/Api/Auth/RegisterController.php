@@ -34,22 +34,22 @@ class RegisterController extends Controller
      * @throws \App\Exceptions\CustomValidationException
      */
     public function register(
-        Request     $request,
+        Request $request,
         UserService $userService
-    ): JsonResponse
-    {
-        $params = $this->customValidate(
-            $request, [
+    ): JsonResponse {
+        $params = $this->customValidate($request, [
             "name" => "required|string",
             "email" => "required|email",
-            "password" => "required|string",
+            "phone_number" => "required|string",
+            "password" => "required|string|min:8",
             "device_id" => "required|string",
         ]);
 
         $user = $userService->createNewUser(
-            strtolower($params["email"]),
-            $params["name"],
-            $params["password"]
+            email: strtolower($params["email"]),
+            name: $params["name"],
+            phone_number: $params["phone_number"],
+            password: $params["password"]
         );
 
         // dispatch a registered event to send a verification email to the user.
