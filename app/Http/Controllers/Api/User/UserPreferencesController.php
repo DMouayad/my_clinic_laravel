@@ -19,7 +19,8 @@ class UserPreferencesController extends Controller
 
     public function __construct(
         private UserPreferencesService $userPreferencesService
-    ) {
+    )
+    {
         $this->middleware(["auth:sanctum"]);
         $this->setResource(UserPreferencesResource::class);
     }
@@ -35,13 +36,13 @@ class UserPreferencesController extends Controller
         $validated = $this->customValidate($request, [
             "user_id" => "integer|required",
             "theme" => "string|nullable",
-            "language" => "string|nullable",
+            "locale" => "string|nullable",
         ]);
 
         $instance = $this->userPreferencesService->store(
             $request->user()->id,
             Arr::get($validated, "theme", "system"),
-            Arr::get($validated, "language", "en")
+            Arr::get($validated, "locale", "en")
         );
         if ($instance) {
             return $this->successResponse(
@@ -77,12 +78,12 @@ class UserPreferencesController extends Controller
     {
         $input = $this->customValidate($request, [
             "theme" => "string|nullable",
-            "language" => "string|nullable",
+            "locale" => "string|nullable",
         ]);
         $was_deleted = $this->userPreferencesService->update(
             $request->user()->preferences,
             Arr::get($input, "theme"),
-            Arr::get($input, "language")
+            Arr::get($input, "locale")
         );
         if ($was_deleted) {
             return $this->successResponse(
@@ -92,7 +93,7 @@ class UserPreferencesController extends Controller
             return $this->errorResponse(
                 error: new CustomError(
                     "Failed to update the preferences of user with id " .
-                        $request->user()->id
+                    $request->user()->id
                 )
             );
         }

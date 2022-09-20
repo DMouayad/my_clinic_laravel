@@ -2,10 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Models\User;
 use App\Models\UserPreferences;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use  App\Models\User;
 
 class UserPreferencesSeeder extends Seeder
 {
@@ -21,7 +20,7 @@ class UserPreferencesSeeder extends Seeder
             UserPreferences::create([
                 'user_id' => $user->id,
                 'theme' => 'dark',
-                'language' => 'en',
+                'locale' => 'en',
             ]);
         }
     }
