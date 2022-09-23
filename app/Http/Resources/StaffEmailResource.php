@@ -9,7 +9,7 @@ class StaffEmailResource extends JsonResource
     /**
      * Transform the resource into an array.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param \Illuminate\Http\Request $request
      * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
      */
     public function toArray($request)
@@ -19,6 +19,7 @@ class StaffEmailResource extends JsonResource
             'id' => $this->id,
             'email' => $this->email,
             'role' => $this->whenLoaded('role'),
+            'user' => new UserResource($this->whenLoaded('user')),
         ];
     }
 }
