@@ -9,7 +9,7 @@ class GetStaffEmailsWithRolesTest extends BaseStaffEmailApiRequestTest
 {
     function getRouteName(): string
     {
-        return "get-staff-emails-with-roles";
+        return "staff-emails-with-roles";
     }
 
     function getRequestMethod(): string
@@ -17,7 +17,7 @@ class GetStaffEmailsWithRolesTest extends BaseStaffEmailApiRequestTest
         return "GET";
     }
 
-    public function test_authorized_request()
+    public function test_authorized_request_returns_success_response()
     {
         $response = $this->makeRequestAuthorizedByUserAbility("admin");
         $response->assertJson(
@@ -29,7 +29,11 @@ class GetStaffEmailsWithRolesTest extends BaseStaffEmailApiRequestTest
                 )
                 ->where("error", null)
                 ->where("status", Response::HTTP_OK)
-                ->where("total", config("my_clinic.seeded_staff_emails_count"))
+                ->where(
+                    "meta.total",
+                    config("my_clinic.seeded_staff_emails_count")
+                )
+                ->etc()
         );
     }
 }

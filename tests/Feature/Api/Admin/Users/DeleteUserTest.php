@@ -20,24 +20,24 @@ class DeleteUserTest extends BaseUserApiRequestTest
         return "delete-user";
     }
 
-    function test_authorized_request()
+    function test_authorized_request_returns_success_response()
     {
         $this->setRouteParameters(["user" => $this->seeded_dentist_id]);
         $response = $this->makeRequestAuthorizedByUserAbility("admin");
         $response->assertStatus(Response::HTTP_NO_CONTENT);
     }
 
-    function test_unauthorized_request()
+    function test_unauthorized_request_returns_error_response()
     {
         $this->setRouteParameters(["user" => $this->seeded_dentist_id]);
 
-        parent::test_unauthorized_request();
+        parent::test_unauthorized_request_returns_error_response();
     }
 
-    function test_request_by_unauthorized_user()
+    function test_request_by_unauthorized_user_returns_error_response()
     {
         $this->setRouteParameters(["user" => $this->seeded_secretary_id]);
 
-        parent::test_request_by_unauthorized_user();
+        parent::test_request_by_unauthorized_user_returns_error_response();
     }
 }

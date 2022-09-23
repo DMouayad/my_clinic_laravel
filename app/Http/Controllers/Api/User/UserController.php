@@ -8,7 +8,6 @@ use App\Models\CustomError;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\UserService;
-use App\Traits\PaginatesResources;
 use App\Traits\ProvidesApiJsonResponse;
 use App\Traits\ProvidesResourcesJsonResponse;
 use Illuminate\Http\Request;
@@ -17,9 +16,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class UserController extends Controller
 {
-    use ProvidesResourcesJsonResponse,
-        PaginatesResources,
-        ProvidesApiJsonResponse;
+    use ProvidesResourcesJsonResponse, ProvidesApiJsonResponse;
 
     public function __construct()
     {
@@ -31,7 +28,7 @@ class UserController extends Controller
         ])->except("show");
 
         $this->setResource(UserResource::class);
-        $this->setPerPage(env("USER_PER_PAGE"));
+        $this->setPerPageCount(env("USER_PER_PAGE"));
     }
 
     /**
@@ -41,9 +38,7 @@ class UserController extends Controller
      **/
     public function index(): ?JsonResource
     {
-        return $this->collection(
-            $this->paginateWhenNeeded(User::with("role")->get())
-        );
+        return $this->paginatedCollection(User::with("role"));
     }
 
     /**
@@ -54,10 +49,8 @@ class UserController extends Controller
     public function getStaffUsers(): ?JsonResource
     {
         $patient_role_id = Role::getIdBySlug("patient");
-        return $this->collection(
-            $this->paginateWhenNeeded(
-                User::whereNot("role_id", $patient_role_id)->with("role")
-            )
+        return $this->paginatedCollection(
+            User::whereNot("role_id", $patient_role_id)->with("role")
         );
     }
 
@@ -97,6 +90,6 @@ class UserController extends Controller
      */
     public function show(Request $request): ?JsonResource
     {
-        return $this->resource($request->user()->load("preferences"));
+        return $this->resource($request->user()->load(["preferences", "role"]));
     }
 }

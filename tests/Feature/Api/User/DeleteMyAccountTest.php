@@ -16,7 +16,7 @@ class DeleteMyAccountTest extends BaseUsersApiRequestTest
         return "DELETE";
     }
 
-    function test_authorized_request()
+    function test_authorized_request_returns_success_response()
     {
         $response = $this->makeRequestAuthorizedByUserAbility("admin");
         $response->assertStatus(Response::HTTP_NO_CONTENT);

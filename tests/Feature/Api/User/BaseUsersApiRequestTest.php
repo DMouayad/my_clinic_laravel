@@ -16,7 +16,13 @@ abstract class BaseUsersApiRequestTest extends BaseApiRequestTestCase
         return ["auth:sanctum", "verified"];
     }
 
-    public function test_unauthorized_request()
+    public function test_unauthorized_request_returns_error_response()
+    {
+        $response = $this->makeRequest();
+        $response->assertUnauthorized();
+    }
+
+    function test_request_by_unauthorized_user_returns_error_response()
     {
         $response = $this->makeRequest();
         $response->assertUnauthorized();
@@ -25,11 +31,5 @@ abstract class BaseUsersApiRequestTest extends BaseApiRequestTestCase
     public function test_route_has_specified_middleware()
     {
         $this->assertRouteContainsMiddleware();
-    }
-
-    function test_request_by_unauthorized_user()
-    {
-        $response = $this->makeRequest();
-        $response->assertUnauthorized();
     }
 }

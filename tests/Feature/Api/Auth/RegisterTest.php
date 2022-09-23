@@ -38,7 +38,7 @@ class RegisterTest extends BaseApiRequestTestCase
         return "POST";
     }
 
-    function test_authorized_request()
+    function test_authorized_request_returns_success_response()
     {
         $response = $this->makeRequest(data: $this->getValidRegistrationData());
         $response->assertStatus(Response::HTTP_CREATED)->assertJson(
@@ -85,7 +85,7 @@ class RegisterTest extends BaseApiRequestTestCase
         ];
     }
 
-    function test_unauthorized_request()
+    function test_unauthorized_request_returns_error_response()
     {
         $not_staffEmail_email = "randomEmail@myclinic.com";
         $response = $this->makeRequest(
@@ -107,7 +107,7 @@ class RegisterTest extends BaseApiRequestTestCase
             );
     }
 
-    function test_request_by_unauthorized_user()
+    function test_request_by_unauthorized_user_returns_error_response()
     {
         $this->createAdminUser();
         // register an already registered user

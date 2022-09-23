@@ -17,7 +17,7 @@ class GetMyInfoTest extends BaseUsersApiRequestTest
         return "get-my-info";
     }
 
-    function test_authorized_request()
+    function test_authorized_request_returns_success_response()
     {
         $response = $this->makeRequestAuthorizedByUserAbility("admin");
         $response->assertStatus(Response::HTTP_OK)->assertJson(
@@ -31,9 +31,9 @@ class GetMyInfoTest extends BaseUsersApiRequestTest
                             "preferences",
                             "created_at",
                             "updated_at",
+                            "role",
                             "phone_number",
                         ])
-                        ->missing("role")
                         // might have email_verified_at
                         ->etc()
                 )

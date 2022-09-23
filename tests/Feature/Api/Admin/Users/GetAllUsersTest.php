@@ -17,12 +17,15 @@ class GetAllUsersTest extends BaseUserApiRequestTest
         return "get-all-users";
     }
 
-    function test_authorized_request()
+    function test_authorized_request_returns_success_response()
     {
         $response = $this->makeRequestAuthorizedByUserAbility("admin");
+        var_dump($response->content());
         $response->assertStatus(Response::HTTP_OK)->assertJson(
             fn(AssertableJson $json) => $json
                 ->has("data", config("my_clinic.seeded_users_count"))
+                ->hasAll(["meta", "links"])
+                ->where("meta.total", config("my_clinic.seeded_users_count"))
                 ->has(
                     "data.0",
                     fn(AssertableJson $userJson) => $userJson
@@ -38,7 +41,6 @@ class GetAllUsersTest extends BaseUserApiRequestTest
                         ->etc()
                 )
                 ->where("status", Response::HTTP_OK)
-                ->where("total", config("my_clinic.seeded_users_count"))
                 ->where("error", null)
         );
     }

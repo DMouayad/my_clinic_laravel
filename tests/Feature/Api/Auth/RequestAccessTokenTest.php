@@ -31,7 +31,7 @@ class RequestAccessTokenTest extends BaseApiRequestTestCase
         return "POST";
     }
 
-    function test_unauthorized_request()
+    function test_unauthorized_request_returns_error_response()
     {
         $response = $this->makeRequest($this->getRequestData());
         $response->assertUnauthorized();
@@ -42,7 +42,7 @@ class RequestAccessTokenTest extends BaseApiRequestTestCase
         return ["device_id" => $this->testing_device_id];
     }
 
-    function test_request_by_unauthorized_user()
+    function test_request_by_unauthorized_user_returns_error_response()
     {
         // request a new access token with an access token authorized request
         $response = $this->makeRequestAuthorizedByUserAbility(
@@ -52,7 +52,7 @@ class RequestAccessTokenTest extends BaseApiRequestTestCase
         $response->assertUnauthorized();
     }
 
-    function test_authorized_request()
+    function test_authorized_request_returns_success_response()
     {
         $login_response = $this->loginUser();
         $refresh_token = $login_response["data"]["refresh_token"];

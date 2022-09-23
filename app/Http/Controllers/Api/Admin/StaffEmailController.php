@@ -12,7 +12,6 @@ use App\Models\CustomError;
 use App\Models\StaffEmail;
 use App\Services\StaffEmailService;
 use App\Services\UserService;
-use App\Traits\PaginatesResources;
 use App\Traits\ProvidesApiJsonResponse;
 use App\Traits\ProvidesResourcesJsonResponse;
 use Illuminate\Http\JsonResponse;
@@ -23,9 +22,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class StaffEmailController extends Controller
 {
-    use ProvidesResourcesJsonResponse,
-        PaginatesResources,
-        ProvidesApiJsonResponse;
+    use ProvidesResourcesJsonResponse, ProvidesApiJsonResponse;
 
     private StaffEmailService $staffEmailService;
 
@@ -41,9 +38,15 @@ class StaffEmailController extends Controller
      */
     public function getEmailsWithRoles(): ?JsonResource
     {
-        $staff_emails = $this->paginateWhenNeeded(StaffEmail::with("role"));
+        return $this->paginatedCollection(StaffEmail::with("role"));
+    }
 
-        return $this->collection($staff_emails);
+    /**
+     * @return JsonResource|null
+     */
+    public function getEmailsWithUsersAndRoles(): ?JsonResource
+    {
+        return $this->paginatedCollection(StaffEmail::with(["role", "user"]));
     }
 
     /**
@@ -53,14 +56,15 @@ class StaffEmailController extends Controller
      */
     public function getEmailsOnly(): JsonResource
     {
-        return $this->collection($this->paginateWhenNeeded(StaffEmail::all()));
+        return $this->paginatedCollection(StaffEmail::paginate());
     }
 
     /**
      * @param Request $request
      * @return JsonResponse
-     * @throws RoleNotFoundException
-     * @throws StaffEmailAlreadyExistsException
+     * @throws \App\Exceptions\CustomValidationException
+     * @throws \App\Exceptions\RoleNotFoundException
+     * @throws \App\Exceptions\StaffEmailAlreadyExistsException
      */
     public function store(Request $request)
     {

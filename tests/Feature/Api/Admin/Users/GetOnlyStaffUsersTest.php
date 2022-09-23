@@ -17,11 +17,18 @@ class GetOnlyStaffUsersTest extends BaseUserApiRequestTest
         return "get-staff-users";
     }
 
-    function test_authorized_request()
+    function test_authorized_request_returns_success_response()
     {
         $response = $this->makeRequestAuthorizedByUserAbility("admin");
         $response->assertStatus(Response::HTTP_OK)->assertJson(
             fn(AssertableJson $json) => $json
+                ->where("status", Response::HTTP_OK)
+                ->where("error", null)
+                ->hasAll(["meta", "links"])
+                ->where(
+                    "meta.total",
+                    config("my_clinic.seeded_staff_users_count")
+                )
                 ->has(
                     "data.0",
                     fn($userJson) => $userJson
@@ -46,9 +53,6 @@ class GetOnlyStaffUsersTest extends BaseUserApiRequestTest
                         )
                         ->etc()
                 )
-                ->where("status", Response::HTTP_OK)
-                ->where("total", config("my_clinic.seeded_staff_users_count"))
-                ->where("error", null)
         );
     }
 }

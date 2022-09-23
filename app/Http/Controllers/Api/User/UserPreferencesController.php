@@ -18,9 +18,8 @@ class UserPreferencesController extends Controller
     use ProvidesApiJsonResponse, ProvidesResourcesJsonResponse;
 
     public function __construct(
-        private UserPreferencesService $userPreferencesService
-    )
-    {
+        private readonly UserPreferencesService $userPreferencesService
+    ) {
         $this->middleware(["auth:sanctum"]);
         $this->setResource(UserPreferencesResource::class);
     }
@@ -59,8 +58,7 @@ class UserPreferencesController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param \App\Models\UserPreferences $userPreferences
-     * @return JsonResource|null
+     * @return \Illuminate\Http\Resources\Json\JsonResource|null
      */
     public function show(Request $request)
     {
@@ -93,7 +91,7 @@ class UserPreferencesController extends Controller
             return $this->errorResponse(
                 error: new CustomError(
                     "Failed to update the preferences of user with id " .
-                    $request->user()->id
+                        $request->user()->id
                 )
             );
         }

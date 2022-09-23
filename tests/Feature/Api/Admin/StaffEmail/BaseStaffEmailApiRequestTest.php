@@ -16,13 +16,13 @@ abstract class BaseStaffEmailApiRequestTest extends BaseApiRequestTestCase
         return ["auth:sanctum", "ability:admin", "verified"];
     }
 
-    public function test_unauthorized_request()
+    public function test_unauthorized_request_returns_error_response()
     {
         $response = $this->makeRequest();
         $response->assertUnauthorized();
     }
 
-    public function test_request_by_unauthorized_user()
+    public function test_request_by_unauthorized_user_returns_error_response()
     {
         $response = $this->makeRequestAuthorizedByUserAbility("dentist");
         $response->assertForbidden();

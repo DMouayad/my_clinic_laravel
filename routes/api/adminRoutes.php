@@ -34,13 +34,18 @@ Route::group($admin_middleware, function () {
             "destroy" => "delete-staff-email",
         ]);
 
-    Route::get("staff-emails", [
+    Route::get("staff-emails-only-emails", [
         StaffEmailController::class,
         "getEmailsOnly",
-    ])->name("get-staff-emails");
+    ])->name("staff-emails-only-emails");
 
     Route::get("staff-emails-with-roles", [
         StaffEmailController::class,
         "getEmailsWithRoles",
-    ])->name("get-staff-emails-with-roles");
+    ])->name("staff-emails-with-roles");
+
+    Route::get("staff-emails", [
+        StaffEmailController::class,
+        "getEmailsWithUsersAndRoles",
+    ])->name("staff-emails-info");
 });

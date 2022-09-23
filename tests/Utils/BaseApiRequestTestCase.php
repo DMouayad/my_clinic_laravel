@@ -10,17 +10,32 @@ use Illuminate\Testing\TestResponse;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
+/**
+ * Base Test Case for testing an API endpoint.
+ *
+ * Provides helper methods for testing route's middleware, authorization and parameters.
+ * Provides methods to make a request with no auth or with sanctum auth
+ */
 abstract class BaseApiRequestTestCase extends TestCase
 {
     use ProvidesUserSeedingData;
 
     private array $route_parameters = [];
 
-    abstract function test_authorized_request();
+    /**
+     * Test that making an authorized request to the api endpoint, with valid data, RETURNS a success response
+     */
+    abstract function test_authorized_request_returns_success_response();
 
-    abstract function test_unauthorized_request();
+    /**
+     * Test that making a request to the api endpoint with no authorization Returns an error response
+     */
+    abstract function test_unauthorized_request_returns_error_response();
 
-    abstract function test_request_by_unauthorized_user();
+    /**
+     * Test that making a valid request to the api endpoint but by unauthorized user Returns an error response
+     */
+    abstract function test_request_by_unauthorized_user_returns_error_response();
 
     public function assertRouteContainsMiddleware(): void
     {
@@ -75,6 +90,7 @@ abstract class BaseApiRequestTestCase extends TestCase
 
     /**
      * @param array $data
+     * @param array $headers
      * @return TestResponse
      */
     protected function makeRequest(

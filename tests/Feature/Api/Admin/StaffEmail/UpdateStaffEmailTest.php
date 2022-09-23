@@ -23,21 +23,21 @@ class UpdateStaffEmailTest extends BaseStaffEmailApiRequestTest
         return "PUT";
     }
 
-    public function test_request_by_unauthorized_user()
+    public function test_request_by_unauthorized_user_returns_error_response()
     {
         $this->setRouteParameters(["staff_email" => 2]);
 
-        parent::test_request_by_unauthorized_user();
+        parent::test_request_by_unauthorized_user_returns_error_response();
     }
 
-    public function test_unauthorized_request()
+    public function test_unauthorized_request_returns_error_response()
     {
         $this->setRouteParameters(["staff_email" => 2]);
 
-        parent::test_unauthorized_request();
+        parent::test_unauthorized_request_returns_error_response();
     }
 
-    public function test_authorized_request()
+    public function test_authorized_request_returns_success_response()
     {
         $new_data = ["email" => "updatedEmail@gmail.com", "role" => "admin"];
         $this->setRouteParameters([

@@ -31,7 +31,7 @@ class LoginTest extends BaseApiRequestTestCase
         return "POST";
     }
 
-    function test_authorized_request()
+    function test_authorized_request_returns_success_response()
     {
         $response = $this->makeRequest(data: $this->getValidLoginData());
         $response->assertStatus(Response::HTTP_OK)->assertJson(
@@ -70,12 +70,12 @@ class LoginTest extends BaseApiRequestTestCase
         ];
     }
 
-    function test_unauthorized_request()
+    function test_unauthorized_request_returns_error_response()
     {
-        $this->test_request_by_unauthorized_user();
+        $this->test_request_by_unauthorized_user_returns_error_response();
     }
 
-    function test_request_by_unauthorized_user()
+    function test_request_by_unauthorized_user_returns_error_response()
     {
         // test login for an already logged-in user
         $response = $this->makeRequestAuthorizedByUserAbility(

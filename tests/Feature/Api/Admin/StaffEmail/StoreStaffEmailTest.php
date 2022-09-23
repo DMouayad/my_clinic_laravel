@@ -24,7 +24,7 @@ class StoreStaffEmailTest extends BaseStaffEmailApiRequestTest
         return "POST";
     }
 
-    public function test_authorized_request()
+    public function test_authorized_request_returns_success_response()
     {
         $response = $this->makeRequestAuthorizedByUserAbility(
             "admin",
