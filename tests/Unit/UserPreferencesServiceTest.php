@@ -9,7 +9,7 @@ use Database\Seeders\RoleSeeder;
 use Database\Seeders\StaffEmailSeeder;
 use Database\Seeders\UsersSeeder;
 use Illuminate\Database\Seeder;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\TestCase;
 use TypeError;
 
@@ -27,7 +27,9 @@ class DatabaseSeeder extends Seeder
 
 class UserPreferencesServiceTest extends TestCase
 {
-    use RefreshDatabase;
+    // it's important to execute db migrations before each test to ensure it's not
+    // affected by other tests.
+    use DatabaseMigrations;
 
     protected $seed = true;
     protected $seeder = DatabaseSeeder::class;

@@ -7,7 +7,7 @@ use App\Exceptions\PhoneNumberAlreadyUsedException;
 use App\Exceptions\UnauthorizedToDeleteUserException;
 use App\Exceptions\UserDoesntMatchHisStaffEmailException;
 use App\Services\UserService;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\TestCase;
 use Tests\Utils\Helpers\TestingUsersHelper;
 use Tests\Utils\Helpers\UserRole;
@@ -15,7 +15,9 @@ use Tests\Utils\RolesAndStaffEmailDBSeeders;
 
 class UserServiceTest extends TestCase
 {
-    use RefreshDatabase;
+    // it's important to execute db migrations before each test to ensure it's not
+    // affected by other tests.
+    use DatabaseMigrations;
 
     protected bool $seed = true;
     protected string $seeder = RolesAndStaffEmailDBSeeders::class;
@@ -198,7 +200,7 @@ class UserServiceTest extends TestCase
         ]);
         // perform delete
         $this->userService->delete($user, $user);
-        // assert tokens was deleted
+        // assert both tokens were deleted
         $this->assertDatabaseMissing("personal_access_tokens", [
             "tokenable_id" => $user->id,
         ]);
