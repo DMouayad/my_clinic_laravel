@@ -3,13 +3,11 @@
 namespace App\Traits;
 
 use App\Models\CustomError;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 trait ProvidesResourcesJsonResponse
 {
-    use ProvidesApiJsonResponse;
-
+    private ?int $per_page = null;
     /**
      * Name of the Model's Resource class.
      *
@@ -22,6 +20,17 @@ trait ProvidesResourcesJsonResponse
      * @var string|null
      */
     private ?string $resource_collection;
+
+    /** Set the number of items to be returned in a paginated CollectionResource.
+     *
+     *  Default to [env.PAGINATION_DEFAULT_COUNT]
+     * @param int $count
+     * @return void
+     */
+    public function setPerPageCount(int $count)
+    {
+        $this->per_page = $count;
+    }
 
     /**
      *
@@ -40,16 +49,17 @@ trait ProvidesResourcesJsonResponse
     /**
      * Get this ModelResource with additional info
      *
-     * @param \Illuminate\Database\Eloquent\Model $resource
+     * @param \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Builder $resource
      * @param integer $status
      * @param \App\Models\CustomError|null $error
      * @return \Illuminate\Http\Resources\Json\JsonResource|null
      */
     public function resource(
-        Model $resource,
+        $resource,
         int $status = 200,
         ?CustomError $error = null
-    ) {
+    ): ?\Illuminate\Http\Resources\Json\JsonResource
+    {
         $response_data = [
             "status" => $status,
             "error" => $error,
@@ -57,6 +67,7 @@ trait ProvidesResourcesJsonResponse
         if ($this->resource) {
             return (new $this->resource($resource))->additional($response_data);
         }
+        return null;
     }
 
     public function setCollection($collection)
@@ -64,44 +75,53 @@ trait ProvidesResourcesJsonResponse
         return $this->resource_collection = $collection;
     }
 
-    /**
-     *
-     * @return \Illuminate\Http\Resources\Json\ResourceCollection|null
-     */
     public function getCollection()
     {
         return $this->resource_collection;
     }
 
     /**
-     * Get this ModelCollectionResource with additional info
+     * Returns a paginated CollectionResource of the provided model collection
      *
-     * @param \Illuminate\Database\Eloquent\Collection $collection
+     * @param \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Builder $collection
      * @param integer $status
      * @param \App\Models\CustomError|null $error
      * @return \Illuminate\Http\Resources\Json\JsonResource|null
      */
-    public function collection(
-        Collection $collection,
+    public function paginatedCollection(
+        $collection,
         int $status = 200,
         ?CustomError $error = null
-    ) {
+    )
+    {
         $response_data = [
             "status" => $status,
-            "total" => $collection->count(),
             "error" => $error,
         ];
         // if the resource_collection was provided we can use it to create a ResourceCollection
-        if (isset($this->resource_collection)) {
-            return $this->resource_collection($collection)->additional(
-                $response_data
+        $paginated_collection = null;
+        if (is_a($collection, LengthAwarePaginator::class)) {
+            $paginated_collection = $collection;
+        } else {
+            $paginated_collection = $collection->paginate(
+                $this->getPerPageCount()
             );
+        }
+        if (isset($this->resource_collection)) {
+            return $this->resource_collection(
+                $paginated_collection
+            )->additional($response_data);
         }
         // if resource_collection wasn't set we use the provided model Resource::collection
         if (isset($this->resource)) {
             return $this->resource
-                ::collection($collection)
+                ::collection($paginated_collection)
                 ->additional($response_data);
         }
+    }
+
+    public function getPerPageCount()
+    {
+        return $this->per_page ?? env("PAGINATION_DEFAULT_COUNT");
     }
 }
