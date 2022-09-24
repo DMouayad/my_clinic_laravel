@@ -5,40 +5,27 @@ namespace Tests\Unit;
 use App\Exceptions\DeletingOnlyAdminStaffEmailException;
 use App\Exceptions\RoleNotFoundException;
 use App\Exceptions\StaffEmailAlreadyExistsException;
-use Tests\TestCase;
 use App\Services\StaffEmailService;
 use Database\Seeders\RoleSeeder;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Database\Seeders\Utils\ProvidesUserSeedingData;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Tests\TestCase;
 
 class StaffEmailServiceTest extends TestCase
 {
-    use  RefreshDatabase, ProvidesUserSeedingData;
+    use  DatabaseMigrations, ProvidesUserSeedingData;
 
     public StaffEmailService $staff_email_service;
 
     protected $seed = true;
     protected $seeder = RoleSeeder::class;
 
-    protected function setUp(): void
-    {
-        $this->staff_email_service = new StaffEmailService();
-        parent::setUp();
-    }
-    public function createAdminStaffEmail()
-    {
-        return $this->staff_email_service->store($this->users_seeding_emails['admin'], 'admin');
-    }
-    public function createDentistStaffEmail()
-    {
-        return $this->staff_email_service->store($this->users_seeding_emails['dentist'], 'dentist');
-    }
     /**
      * CREATE METHOD TESTS
      */
     public function test_creating_staff_email_with_valid_input()
     {
-        $staff_email =  $this->staff_email_service->store($this->users_seeding_emails['admin'], 'admin');
+        $staff_email = $this->staff_email_service->store($this->users_seeding_emails['admin'], 'admin');
         $this->assertModelExists($staff_email);
     }
 
@@ -51,6 +38,7 @@ class StaffEmailServiceTest extends TestCase
             RoleNotFoundException::class
         );
     }
+
     public function test_creating_staff_email_with_already_existing_email_throws_exception()
     {
         $this->assertThrows(
@@ -61,9 +49,12 @@ class StaffEmailServiceTest extends TestCase
             StaffEmailAlreadyExistsException::class
         );
     }
-    /**
-     * END OF CREATE METHOD TESTS
-     */
+
+    public function createAdminStaffEmail()
+    {
+        return $this->staff_email_service->store($this->users_seeding_emails['admin'], 'admin');
+    }
+
     /**
      * UPDATE METHOD TESTS
      */
@@ -78,6 +69,7 @@ class StaffEmailServiceTest extends TestCase
         $this->assertSame($new_email, $updated->email);
         $this->assertSame($new_role, $updated->roleSlug());
     }
+
     public function test_update_staff_email_with_already_existing_email_throws_exception()
     {
         $this->assertThrows(
@@ -89,6 +81,15 @@ class StaffEmailServiceTest extends TestCase
             StaffEmailAlreadyExistsException::class
         );
     }
+    /**
+     * END OF CREATE METHOD TESTS
+     */
+
+    public function createDentistStaffEmail()
+    {
+        return $this->staff_email_service->store($this->users_seeding_emails['dentist'], 'dentist');
+    }
+
     public function test_update_staff_email_with_invalid_role_throws_exception()
     {
         $this->assertThrows(
@@ -99,6 +100,7 @@ class StaffEmailServiceTest extends TestCase
             RoleNotFoundException::class
         );
     }
+
     public function test_deleting_staffEmail()
     {
         $staff_email = $this->createDentistStaffEmail();
@@ -106,11 +108,18 @@ class StaffEmailServiceTest extends TestCase
         $this->assertModelMissing($staff_email);
         $this->assertTrue($was_deleted);
     }
+
     public function test_deleting_only_admin_staffEmail_throws_exception()
     {
         $this->assertThrows(function () {
             $staff_email = $this->createAdminStaffEmail();
             $this->staff_email_service->delete($staff_email);
         }, DeletingOnlyAdminStaffEmailException::class);
+    }
+
+    protected function setUp(): void
+    {
+        $this->staff_email_service = new StaffEmailService();
+        parent::setUp();
     }
 }
