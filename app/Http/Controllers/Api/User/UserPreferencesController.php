@@ -42,10 +42,7 @@ class UserPreferencesController extends Controller
             Arr::get($validated, "locale", "en")
         );
         if ($instance) {
-            return $this->successResponse(
-                ["user_preferences" => $instance],
-                status_code: Response::HTTP_CREATED
-            );
+            return $this->successResponse(status_code: Response::HTTP_CREATED);
         } else {
             return $this->errorResponse(
                 error: new CustomError("user preferences were not saved!")
