@@ -5,25 +5,10 @@ namespace Tests\Unit;
 use App\Exceptions\UserNotFoundException;
 use App\Models\User;
 use App\Services\UserPreferencesService;
-use Database\Seeders\RoleSeeder;
-use Database\Seeders\StaffEmailSeeder;
-use Database\Seeders\UsersSeeder;
-use Illuminate\Database\Seeder;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\TestCase;
+use Tests\Utils\CustomDatabaseSeeders\AllExceptUserPreferencesDBSeeder;
 use TypeError;
-
-class DatabaseSeeder extends Seeder
-{
-    public function run()
-    {
-        $this->call([
-            RoleSeeder::class,
-            StaffEmailSeeder::class,
-            UsersSeeder::class,
-        ]);
-    }
-}
 
 class UserPreferencesServiceTest extends TestCase
 {
@@ -31,10 +16,10 @@ class UserPreferencesServiceTest extends TestCase
     // affected by other tests.
     use DatabaseMigrations;
 
-    protected $seed = true;
-    protected $seeder = DatabaseSeeder::class;
+    protected bool $seed = true;
+    protected string $seeder = AllExceptUserPreferencesDBSeeder::class;
     private UserPreferencesService $userPreferencesService;
-    private $data = ["theme" => "dark", "locale" => "en"];
+    private array $data = ["theme" => "dark", "locale" => "en"];
 
     public function setUp(): void
     {
@@ -62,11 +47,20 @@ class UserPreferencesServiceTest extends TestCase
     public function test_store_new_user_preferences_with_nonExisting_userId_throws_exception()
     {
         $this->assertThrows(function () {
-            $this->userPreferencesService->store(5, ...$this->data);
+            // setup
+
+            $notExistingUserId = config("my_clinic.seeded_users_count") + 1;
+            // assert user with id doesn't exist
+            $this->assertDatabaseMissing("users", ["id" => $notExistingUserId]);
+
+            $this->userPreferencesService->store(
+                $notExistingUserId,
+                ...$this->data
+            );
         }, UserNotFoundException::class);
     }
 
-    public function test_update_user_preferences()
+    public function test_update_user_preferences_with_valid_data_is_completed_successfully()
     {
         $user = User::find(1);
         $user_preferences = $this->userPreferencesService->store(
@@ -88,7 +82,7 @@ class UserPreferencesServiceTest extends TestCase
         ]);
     }
 
-    public function test_delete_user_preferences()
+    public function test_delete_user_preferences_is_completed_successfully()
     {
         // create new UserPreferences
         $user = User::find(1);
