@@ -19,7 +19,7 @@ class GetStaffEmailsWithRolesTest extends BaseStaffEmailApiRequestTest
 
     public function test_authorized_request_returns_success_response()
     {
-        $response = $this->makeRequestAuthorizedByUserAbility("admin");
+        $response = $this->makeRequestAuthorizedByUser("admin");
         $response->assertJson(
             fn(AssertableJson $json) => $json
                 ->has(

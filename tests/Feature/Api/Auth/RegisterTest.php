@@ -111,7 +111,7 @@ class RegisterTest extends BaseApiRequestTestCase
     {
         $this->createAdminUser();
         // register an already registered user
-        $response = $this->makeRequestAuthorizedByUserAbility(
+        $response = $this->makeRequestAuthorizedByUser(
             "admin",
             data: $this->getValidRegistrationData()
         );

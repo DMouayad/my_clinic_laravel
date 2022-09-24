@@ -78,7 +78,7 @@ class LoginTest extends BaseApiRequestTestCase
     function test_request_by_unauthorized_user_returns_error_response()
     {
         // test login for an already logged-in user
-        $response = $this->makeRequestAuthorizedByUserAbility(
+        $response = $this->makeRequestAuthorizedByUser(
             "admin",
             data: $this->getValidLoginData()
         );

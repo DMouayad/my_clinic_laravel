@@ -45,7 +45,7 @@ class RequestAccessTokenTest extends BaseApiRequestTestCase
     function test_request_by_unauthorized_user_returns_error_response()
     {
         // request a new access token with an access token authorized request
-        $response = $this->makeRequestAuthorizedByUserAbility(
+        $response = $this->makeRequestAuthorizedByUser(
             "admin",
             $this->getRequestData()
         );

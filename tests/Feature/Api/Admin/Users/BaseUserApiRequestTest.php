@@ -25,7 +25,7 @@ abstract class BaseUserApiRequestTest extends BaseApiRequestTestCase
 
     function test_request_by_unauthorized_user_returns_error_response()
     {
-        $response = $this->makeRequestAuthorizedByUserAbility("dentist");
+        $response = $this->makeRequestAuthorizedByUser("dentist");
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 

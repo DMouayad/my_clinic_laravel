@@ -19,7 +19,7 @@ class GetStaffEmailsWithoutRolesTest extends BaseStaffEmailApiRequestTest
 
     public function test_authorized_request_returns_success_response()
     {
-        $response = $this->makeRequestAuthorizedByUserAbility("admin");
+        $response = $this->makeRequestAuthorizedByUser("admin");
         $seeded_staff_emails_count = config(
             "my_clinic.seeded_staff_emails_count"
         );

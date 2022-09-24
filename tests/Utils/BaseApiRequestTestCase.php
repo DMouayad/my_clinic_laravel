@@ -113,11 +113,17 @@ abstract class BaseApiRequestTestCase extends TestCase
     }
 
     /**
+     * Make a request to the route specified with [getRouteName]
+     *
+     * [Sanctum::actingAs] is called with the provided user.
+     * if user is null, a user role must be provided to get
+     * a user with same role from the database.
+     *
      * @param string $ability
      * @param array $data
      * @return TestResponse
      */
-    protected function makeRequestAuthorizedByUserAbility(
+    protected function makeRequestAuthorizedByUser(
         string $ability,
         array $data = []
     ): TestResponse {
@@ -131,7 +137,7 @@ abstract class BaseApiRequestTestCase extends TestCase
         );
     }
 
-    private function getUser(string $ability): User
+    public function getUser(string $ability): User
     {
         $role_id = Role::getIdBySlug($ability);
         $user = User::whereRoleId($role_id)->first();

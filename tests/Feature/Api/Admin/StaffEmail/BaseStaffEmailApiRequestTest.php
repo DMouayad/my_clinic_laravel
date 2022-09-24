@@ -24,7 +24,7 @@ abstract class BaseStaffEmailApiRequestTest extends BaseApiRequestTestCase
 
     public function test_request_by_unauthorized_user_returns_error_response()
     {
-        $response = $this->makeRequestAuthorizedByUserAbility("dentist");
+        $response = $this->makeRequestAuthorizedByUser("dentist");
         $response->assertForbidden();
     }
 

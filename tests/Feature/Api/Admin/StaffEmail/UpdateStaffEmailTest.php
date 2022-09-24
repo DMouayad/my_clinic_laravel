@@ -44,10 +44,7 @@ class UpdateStaffEmailTest extends BaseStaffEmailApiRequestTest
             "staff_email" => $this->admin_staffEmail_id,
         ]);
 
-        $response = $this->makeRequestAuthorizedByUserAbility(
-            "admin",
-            $new_data
-        );
+        $response = $this->makeRequestAuthorizedByUser("admin", $new_data);
 
         $response->assertStatus(Response::HTTP_NO_CONTENT);
     }
@@ -55,7 +52,7 @@ class UpdateStaffEmailTest extends BaseStaffEmailApiRequestTest
     public function test_authorized_request_with_missing_parameters_throws_exception()
     {
         $this->assertThrows(function () {
-            $this->makeRequestAuthorizedByUserAbility("admin");
+            $this->makeRequestAuthorizedByUser("admin");
         }, UrlGenerationException::class);
     }
 
@@ -64,7 +61,7 @@ class UpdateStaffEmailTest extends BaseStaffEmailApiRequestTest
         $this->setRouteParameters([
             "staff_email" => $this->admin_staffEmail_id,
         ]);
-        $response = $this->makeRequestAuthorizedByUserAbility("admin");
+        $response = $this->makeRequestAuthorizedByUser("admin");
         $response->assertStatus(Response::HTTP_BAD_REQUEST);
     }
 
@@ -78,7 +75,7 @@ class UpdateStaffEmailTest extends BaseStaffEmailApiRequestTest
             "role" => "admin",
         ];
 
-        $response = $this->makeRequestAuthorizedByUserAbility(
+        $response = $this->makeRequestAuthorizedByUser(
             "admin",
             $already_seeded_data
         );
@@ -102,10 +99,7 @@ class UpdateStaffEmailTest extends BaseStaffEmailApiRequestTest
         $this->setRouteParameters([
             "staff_email" => $this->dentist_staffEmail_id,
         ]);
-        $response = $this->makeRequestAuthorizedByUserAbility(
-            "admin",
-            $invalid_data
-        );
+        $response = $this->makeRequestAuthorizedByUser("admin", $invalid_data);
         $response
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJson(

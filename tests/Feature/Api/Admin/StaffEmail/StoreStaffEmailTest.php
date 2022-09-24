@@ -26,7 +26,7 @@ class StoreStaffEmailTest extends BaseStaffEmailApiRequestTest
 
     public function test_authorized_request_returns_success_response()
     {
-        $response = $this->makeRequestAuthorizedByUserAbility(
+        $response = $this->makeRequestAuthorizedByUser(
             "admin",
             $this->request_data
         );
@@ -41,7 +41,7 @@ class StoreStaffEmailTest extends BaseStaffEmailApiRequestTest
 
     public function test_authorized_request_with_missing_data_returns_error()
     {
-        $response = $this->makeRequestAuthorizedByUserAbility("admin");
+        $response = $this->makeRequestAuthorizedByUser("admin");
         $response
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJson(
@@ -58,7 +58,7 @@ class StoreStaffEmailTest extends BaseStaffEmailApiRequestTest
             "email" => "NotValidEmail",
             "role" => "admin",
         ];
-        $response = $this->makeRequestAuthorizedByUserAbility(
+        $response = $this->makeRequestAuthorizedByUser(
             "admin",
             $invalid_data
         );
@@ -78,7 +78,7 @@ class StoreStaffEmailTest extends BaseStaffEmailApiRequestTest
             "email" => "admin@myclinic.com",
             "role" => "admin",
         ];
-        $response = $this->makeRequestAuthorizedByUserAbility(
+        $response = $this->makeRequestAuthorizedByUser(
             "admin",
             $already_seeded_data
         );
@@ -99,7 +99,7 @@ class StoreStaffEmailTest extends BaseStaffEmailApiRequestTest
             "email" => "testEmail@gmail.com",
             "role" => "someRole",
         ];
-        $response = $this->makeRequestAuthorizedByUserAbility(
+        $response = $this->makeRequestAuthorizedByUser(
             "admin",
             $invalid_data
         );

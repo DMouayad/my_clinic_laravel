@@ -37,7 +37,7 @@ class DeleteStaffEmailTest extends BaseStaffEmailApiRequestTest
     public function test_authorized_request_returns_success_response()
     {
         $this->setRouteParameters(["staff_email" => 2]);
-        $response = $this->makeRequestAuthorizedByUserAbility("admin");
+        $response = $this->makeRequestAuthorizedByUser("admin");
         $response->assertStatus(Response::HTTP_OK)->assertJson(
             fn(AssertableJson $json) => $json
                 ->where("data", null)
@@ -50,7 +50,7 @@ class DeleteStaffEmailTest extends BaseStaffEmailApiRequestTest
     public function test_authorized_request_with_missing_parameter_throws_exception()
     {
         $this->assertThrows(function () {
-            $this->makeRequestAuthorizedByUserAbility("admin");
+            $this->makeRequestAuthorizedByUser("admin");
         }, UrlGenerationException::class);
     }
 
@@ -61,7 +61,7 @@ class DeleteStaffEmailTest extends BaseStaffEmailApiRequestTest
             "staff_email" => "NotAnID-Or-IDForNonExistingInstance",
         ]);
 
-        $response = $this->makeRequestAuthorizedByUserAbility("admin");
+        $response = $this->makeRequestAuthorizedByUser("admin");
         $response->assertStatus(Response::HTTP_NOT_FOUND)->assertJson(
             fn(AssertableJson $json) => $json
                 ->where("exception", NotFoundHttpException::class)
@@ -75,7 +75,7 @@ class DeleteStaffEmailTest extends BaseStaffEmailApiRequestTest
         // add the id of to-be-deleted StaffEmail as a parameter in request url
         $this->setRouteParameters(["staff_email" => 1]);
 
-        $response = $this->makeRequestAuthorizedByUserAbility("admin");
+        $response = $this->makeRequestAuthorizedByUser("admin");
         $response->assertStatus(Response::HTTP_CONFLICT)->assertJson(
             fn(AssertableJson $json) => $json
                 ->where("status", Response::HTTP_CONFLICT)
