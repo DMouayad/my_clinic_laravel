@@ -16,7 +16,7 @@ Route::middleware(["auth:sanctum", "verified"])
         Route::post("me/preferences", [
             UserPreferencesController::class,
             "store",
-        ])->name("save");
+        ])->name("add");
         //
         Route::put("me/preferences", [
             UserPreferencesController::class,
