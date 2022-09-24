@@ -9,9 +9,9 @@ use App\Exceptions\UserDoesntMatchHisStaffEmailException;
 use App\Services\UserService;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\TestCase;
+use Tests\Utils\CustomDatabaseSeeders\RolesAndStaffEmailDBSeeder;
 use Tests\Utils\Helpers\TestingUsersHelper;
 use Tests\Utils\Helpers\UserRole;
-use Tests\Utils\RolesAndStaffEmailDBSeeders;
 
 class UserServiceTest extends TestCase
 {
@@ -20,7 +20,7 @@ class UserServiceTest extends TestCase
     use DatabaseMigrations;
 
     protected bool $seed = true;
-    protected string $seeder = RolesAndStaffEmailDBSeeders::class;
+    protected string $seeder = RolesAndStaffEmailDBSeeder::class;
     private TestingUsersHelper $helper;
     private UserService $userService;
 

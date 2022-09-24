@@ -13,15 +13,15 @@ use Illuminate\Support\Str;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\Utils\BaseApiRequestTestCase;
+use Tests\Utils\CustomDatabaseSeeders\RolesAndStaffEmailDBSeeder;
 use Tests\Utils\Helpers\TestingUsersHelper;
 use Tests\Utils\Helpers\UserRole;
-use Tests\Utils\RolesAndStaffEmailDBSeeders;
 
 class RegisterTest extends BaseApiRequestTestCase
 {
     use ProvidesUserSeedingData, RefreshDatabase;
 
-    protected string $seeder = RolesAndStaffEmailDBSeeders::class;
+    protected string $seeder = RolesAndStaffEmailDBSeeder::class;
 
     function getRouteName(): string
     {
