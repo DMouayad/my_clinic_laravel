@@ -10,6 +10,7 @@ use App\Traits\ProvidesApiJsonResponse;
 use App\Traits\ProvidesResourcesJsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Validation\Rule;
 use Symfony\Component\HttpFoundation\Response;
 
 class UserPreferencesController extends Controller
@@ -31,10 +32,10 @@ class UserPreferencesController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $this->customValidate($request, [
-            "theme" => "string|nullable",
-            "locale" => "string|nullable",
-        ]);
+        $validated = $this->customValidate(
+            $request,
+            $this->getValidationRules(false)
+        );
 
         $instance = $this->userPreferencesService->store(
             $request->user()->id,
@@ -51,6 +52,42 @@ class UserPreferencesController extends Controller
     }
 
     /**
+     * @param bool $isUpdateRequest
+     * @return array|array[]
+     */
+    private function getValidationRules(bool $isUpdateRequest): array
+    {
+        $rules = [
+            "theme" => [
+                "string",
+                Rule::in(
+                    explode(",", config("my_clinic.supported_theme_modes"))
+                ),
+            ],
+            "locale" => [
+                "string",
+                Rule::in(explode(",", config("my_clinic.supported_locales"))),
+            ],
+        ];
+        if ($isUpdateRequest) {
+            // make fields nullable and required only if the other one is not present/null
+            $rules["theme"] = array_merge($rules["theme"], [
+                "required_without:locale",
+                "nullable",
+            ]);
+            $rules["locale"] = array_merge($rules["locale"], [
+                "required_without:theme",
+                "nullable",
+            ]);
+        } else {
+            // else in case of adding new UserPreferences, both are required
+            $rules["theme"][] = "required";
+            $rules["locale"][] = "required";
+        }
+        return $rules;
+    }
+
+    /**
      * Display the specified resource.
      *
      * @return \Illuminate\Http\Resources\Json\JsonResource|null
@@ -64,38 +101,32 @@ class UserPreferencesController extends Controller
      * Update the specified resource in storage.
      *
      * @param \Illuminate\Http\Request $request
-     * @param \App\Models\UserPreferences $userPreferences
      * @return \Illuminate\Http\JsonResponse
+     * @throws \App\Exceptions\CustomValidationException
      */
     public function update(Request $request)
     {
-        $input = $this->customValidate($request, [
-            "theme" => "string|nullable",
-            "locale" => "string|nullable",
-        ]);
-        if (empty($input)) {
-            return $this->errorResponse(
-                new CustomError(message: "No data was provided"),
-                status_code: Response::HTTP_BAD_REQUEST
+        $input = $this->customValidate(
+            $request,
+            $this->getValidationRules(true)
+        );
+
+        $was_updated = $this->userPreferencesService->update(
+            $request->user()->preferences,
+            Arr::get($input, "theme"),
+            Arr::get($input, "locale")
+        );
+        if ($was_updated) {
+            return $this->successResponse(
+                status_code: Response::HTTP_NO_CONTENT
             );
         } else {
-            $was_updated = $this->userPreferencesService->update(
-                $request->user()->preferences,
-                Arr::get($input, "theme"),
-                Arr::get($input, "locale")
+            return $this->errorResponse(
+                error: new CustomError(
+                    "Failed to update the preferences of user with id " .
+                        $request->user()->id
+                )
             );
-            if ($was_updated) {
-                return $this->successResponse(
-                    status_code: Response::HTTP_NO_CONTENT
-                );
-            } else {
-                return $this->errorResponse(
-                    error: new CustomError(
-                        "Failed to update the preferences of user with id " .
-                            $request->user()->id
-                    )
-                );
-            }
         }
     }
 

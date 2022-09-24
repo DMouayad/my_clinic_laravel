@@ -17,4 +17,7 @@ return [
     "seeded_users_count" => 3,
     "seeded_staff_users_count" => 3,
     "seeded_staff_emails_count" => 3,
+
+    "supported_locales" => implode(",", ["ar", "en"]),
+    "supported_theme_modes" => implode(",", ["system", "dark", "light"]),
 ];
