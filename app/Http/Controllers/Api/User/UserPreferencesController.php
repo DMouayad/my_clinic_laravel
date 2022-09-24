@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api\User;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserPreferencesResource;
 use App\Models\CustomError;
-use App\Models\UserPreferences;
 use App\Services\UserPreferencesService;
 use App\Traits\ProvidesApiJsonResponse;
 use App\Traits\ProvidesResourcesJsonResponse;
@@ -33,7 +32,6 @@ class UserPreferencesController extends Controller
     public function store(Request $request)
     {
         $validated = $this->customValidate($request, [
-            "user_id" => "integer|required",
             "theme" => "string|nullable",
             "locale" => "string|nullable",
         ]);
@@ -78,33 +76,41 @@ class UserPreferencesController extends Controller
             "theme" => "string|nullable",
             "locale" => "string|nullable",
         ]);
-        $was_deleted = $this->userPreferencesService->update(
-            $request->user()->preferences,
-            Arr::get($input, "theme"),
-            Arr::get($input, "locale")
-        );
-        if ($was_deleted) {
-            return $this->successResponse(
-                status_code: Response::HTTP_NO_CONTENT
+        if (empty($input)) {
+            return $this->errorResponse(
+                new CustomError(message: "No data was provided"),
+                status_code: Response::HTTP_BAD_REQUEST
             );
         } else {
-            return $this->errorResponse(
-                error: new CustomError(
-                    "Failed to update the preferences of user with id " .
-                        $request->user()->id
-                )
+            $was_updated = $this->userPreferencesService->update(
+                $request->user()->preferences,
+                Arr::get($input, "theme"),
+                Arr::get($input, "locale")
             );
+            if ($was_updated) {
+                return $this->successResponse(
+                    status_code: Response::HTTP_NO_CONTENT
+                );
+            } else {
+                return $this->errorResponse(
+                    error: new CustomError(
+                        "Failed to update the preferences of user with id " .
+                            $request->user()->id
+                    )
+                );
+            }
         }
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param \App\Models\UserPreferences $userPreferences
+     * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function destroy(UserPreferences $userPreferences)
+    public function destroy(Request $request)
     {
+        $userPreferences = $request->user()->preferences;
         $was_deleted = $this->userPreferencesService->delete($userPreferences);
         if ($was_deleted) {
             return $this->successResponse(
