@@ -20,7 +20,7 @@ class UserPreferencesController extends Controller
     public function __construct(
         private readonly UserPreferencesService $userPreferencesService
     ) {
-        $this->middleware(["auth:sanctum"]);
+        $this->middleware(["auth:sanctum", "verified"]);
         $this->setResource(UserPreferencesResource::class);
     }
 
