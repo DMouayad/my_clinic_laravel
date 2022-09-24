@@ -20,7 +20,7 @@ class GetAllUsersTest extends BaseUserApiRequestTest
     function test_authorized_request_returns_success_response()
     {
         $response = $this->makeRequestAuthorizedByUser("admin");
-        var_dump($response->content());
+
         $response->assertStatus(Response::HTTP_OK)->assertJson(
             fn(AssertableJson $json) => $json
                 ->has("data", config("my_clinic.seeded_users_count"))
