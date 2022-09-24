@@ -119,15 +119,17 @@ abstract class BaseApiRequestTestCase extends TestCase
      * if user is null, a user role must be provided to get
      * a user with same role from the database.
      *
-     * @param string $ability
+     * @param string|null $role
      * @param array $data
+     * @param \App\Models\User|null $user
      * @return TestResponse
      */
     protected function makeRequestAuthorizedByUser(
-        string $ability,
-        array $data = []
+        ?string $role = null,
+        array $data = [],
+        ?User $user = null
     ): TestResponse {
-        Sanctum::actingAs($this->getUser($ability), [$ability]);
+        Sanctum::actingAs($user ?? $this->getUser($role), [$role]);
 
         return $this->json(
             $this->getRequestMethod(),
