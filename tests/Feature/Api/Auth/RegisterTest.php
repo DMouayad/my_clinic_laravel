@@ -14,8 +14,8 @@ use Illuminate\Testing\Fluent\AssertableJson;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\Utils\BaseApiRequestTestCase;
 use Tests\Utils\CustomDatabaseSeeders\RolesAndStaffEmailDBSeeder;
+use Tests\Utils\Enums\UserRole;
 use Tests\Utils\Helpers\TestingUsersHelper;
-use Tests\Utils\Helpers\UserRole;
 
 class RegisterTest extends BaseApiRequestTestCase
 {

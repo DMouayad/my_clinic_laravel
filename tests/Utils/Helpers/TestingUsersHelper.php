@@ -7,35 +7,39 @@ use App\Services\UserService;
 use Database\Seeders\Utils\ProvidesUserSeedingData;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
+use Tests\Utils\Enums\UserRole;
 
 class TestingUsersHelper
 {
     use ProvidesUserSeedingData;
 
-    public function __construct(private UserService $userService)
+    public function __construct(private readonly UserService $userService)
     {
     }
 
     /**
      *
-     * @param \Tests\Utils\Helpers\UserRole $userRole
+     * @param \Tests\Utils\Enums\UserRole $userRole
      * @param boolean $grant_access_token
      * @param boolean $store_access_token
      * @param bool $store_refresh_token
      * @return \App\Models\User
+     * @throws \App\Exceptions\EmailAlreadyRegisteredException
+     * @throws \App\Exceptions\PhoneNumberAlreadyUsedException
      */
     public function createUserByRole(
         UserRole $userRole,
-        bool $grant_access_token = false,
-        bool $store_access_token = false,
-        bool $store_refresh_token = false
-    ): User {
+        bool     $grant_access_token = false,
+        bool     $store_access_token = false,
+        bool     $store_refresh_token = false
+    ): User
+    {
         $role_slug = $userRole->value;
         $user = $this->userService->createNewUser(
             email: $this->users_seeding_emails[$role_slug],
             name: "test " . $role_slug,
-            password: "password",
-            phone_number: Str::random(9)
+            phone_number: Str::random(9),
+            password: "password"
         );
         if ($grant_access_token) {
             $this->giveToken($user, [$role_slug]);
@@ -76,12 +80,4 @@ class TestingUsersHelper
     {
         $user->createRefreshToken("test_refresh_token");
     }
-}
-
-enum UserRole: string
-{
-    case admin = "admin";
-    case dentist = "dentist";
-    case secretary = "secretary";
-    case patient = "patient";
 }

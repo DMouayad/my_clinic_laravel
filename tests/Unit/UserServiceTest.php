@@ -10,8 +10,8 @@ use App\Services\UserService;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\TestCase;
 use Tests\Utils\CustomDatabaseSeeders\RolesAndStaffEmailDBSeeder;
+use Tests\Utils\Enums\UserRole;
 use Tests\Utils\Helpers\TestingUsersHelper;
-use Tests\Utils\Helpers\UserRole;
 
 class UserServiceTest extends TestCase
 {
