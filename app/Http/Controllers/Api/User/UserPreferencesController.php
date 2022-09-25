@@ -139,13 +139,8 @@ class UserPreferencesController extends Controller
     public function destroy(Request $request)
     {
         $userPreferences = $request->user()->preferences;
-        $was_deleted = $this->userPreferencesService->delete($userPreferences);
-        if ($was_deleted) {
-            return $this->successResponse(
-                status_code: Response::HTTP_NO_CONTENT
-            );
-        } else {
-            return $this->errorResponse();
-        }
+
+        $this->userPreferencesService->delete($userPreferences);
+        return $this->successResponse(status_code: Response::HTTP_NO_CONTENT);
     }
 }

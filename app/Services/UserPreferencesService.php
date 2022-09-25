@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Exceptions\DeleteAttemptOfNonExistingModelException;
 use App\Exceptions\UserNotFoundException;
 use App\Exceptions\UserPreferencesAlreadyExistsException;
 use App\Models\User;
@@ -57,11 +58,17 @@ class UserPreferencesService
 
     /**
      *
-     * @param \App\Models\UserPreferences $user_preferences
+     * @param \App\Models\UserPreferences|null $user_preferences
      * @return boolean
+     * @throws \App\Exceptions\DeleteAttemptOfNonExistingModelException
      */
-    public function delete(UserPreferences $user_preferences): bool
+    public function delete(?UserPreferences $user_preferences): bool
     {
-        return $user_preferences->delete();
+        // if provided UserPreferences not null, proceed with deleting it
+        if ($user_preferences) {
+            return $user_preferences->delete();
+        }
+        // otherwise throw an exception
+        throw new DeleteAttemptOfNonExistingModelException();
     }
 }
