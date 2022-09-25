@@ -69,12 +69,11 @@ class UserPreferencesServiceTest extends TestCase
         );
         $this->assertModelExists($user_preferences);
 
-        $updated = $this->userPreferencesService->update(
+        $this->userPreferencesService->update(
             $user_preferences,
             "new_theme",
             "new_locale"
         );
-        $this->assertTrue($updated);
         $this->assertDatabaseHas("user_preferences", [
             "user_id" => $user->id,
             "theme" => "new_theme",

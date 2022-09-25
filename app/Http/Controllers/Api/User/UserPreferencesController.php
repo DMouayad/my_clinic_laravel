@@ -101,6 +101,7 @@ class UserPreferencesController extends Controller
      * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\JsonResponse
      * @throws \App\Exceptions\CustomValidationException
+     * @throws \App\Exceptions\FailedToSaveObjectException
      * @throws \App\Exceptions\UpdateRequestForNonExistingObjectException
      */
     public function update(Request $request)
@@ -123,6 +124,8 @@ class UserPreferencesController extends Controller
      *
      * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\JsonResponse
+     * @throws \App\Exceptions\DeleteAttemptOfNonExistingModelException
+     * @throws \App\Exceptions\FailedToDeleteObjectException
      */
     public function destroy(Request $request)
     {

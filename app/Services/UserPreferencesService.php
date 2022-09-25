@@ -3,22 +3,20 @@
 namespace App\Services;
 
 use App\Exceptions\DeleteAttemptOfNonExistingModelException;
+use App\Exceptions\FailedToDeleteObjectException;
 use App\Exceptions\FailedToSaveObjectException;
 use App\Exceptions\UpdateRequestForNonExistingObjectException;
 use App\Models\User;
 use App\Models\UserPreferences;
-use App\Traits\ProvidesClassName;
 
 class UserPreferencesService
 {
-    use ProvidesClassName;
-
     /**
      *
      * @param int|null $user_id
      * @param string|null $theme
      * @param string|null $locale
-     * @return UserPreferences
+     * @return \App\Models\UserPreferences
      * @throws \App\Exceptions\FailedToSaveObjectException
      * @throws \App\Exceptions\UserNotFoundException
      * @throws \App\Exceptions\UserPreferencesAlreadyExistsException
@@ -36,11 +34,10 @@ class UserPreferencesService
         $user_preferences->theme = $theme;
         $user_preferences->locale = $locale;
 
-        if ($user_preferences->save()) {
-            return $user_preferences;
-        } else {
-            throw new FailedToSaveObjectException(self::className());
+        if (!$user_preferences->save()) {
+            throw new FailedToSaveObjectException(UserPreferences::class);
         }
+        return $user_preferences;
     }
 
     /**
@@ -49,20 +46,26 @@ class UserPreferencesService
      * @param \App\Models\UserPreferences|null $user_preferences
      * @param string|null $theme
      * @param string|null $locale
-     * @return bool
+     * @return \App\Models\UserPreferences
+     * @throws \App\Exceptions\FailedToSaveObjectException
      * @throws \App\Exceptions\UpdateRequestForNonExistingObjectException
      */
     public function update(
         ?UserPreferences $user_preferences,
         string|null $theme,
         string|null $locale
-    ): bool {
+    ): UserPreferences {
         if ($user_preferences) {
             $user_preferences->theme = $theme ?? $user_preferences->theme;
             $user_preferences->locale = $locale ?? $user_preferences->locale;
-            return $user_preferences->save();
+
+            if (!$user_preferences->save()) {
+                throw new FailedToSaveObjectException(UserPreferences::class);
+            }
+            return $user_preferences;
+        } else {
+            throw new UpdateRequestForNonExistingObjectException();
         }
-        throw new UpdateRequestForNonExistingObjectException();
     }
 
     /**
@@ -70,12 +73,18 @@ class UserPreferencesService
      * @param \App\Models\UserPreferences|null $user_preferences
      * @return boolean
      * @throws \App\Exceptions\DeleteAttemptOfNonExistingModelException
+     * @throws \App\Exceptions\FailedToDeleteObjectException
      */
     public function delete(?UserPreferences $user_preferences): bool
     {
         if ($user_preferences) {
-            return $user_preferences->delete();
+            $was_deleted = $user_preferences->delete();
+            if (!$was_deleted) {
+                throw new FailedToDeleteObjectException(UserPreferences::class);
+            }
+            return $was_deleted;
+        } else {
+            throw new DeleteAttemptOfNonExistingModelException();
         }
-        throw new DeleteAttemptOfNonExistingModelException();
     }
 }
