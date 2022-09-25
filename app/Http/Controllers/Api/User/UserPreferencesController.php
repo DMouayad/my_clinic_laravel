@@ -4,10 +4,10 @@ namespace App\Http\Controllers\Api\User;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserPreferencesResource;
-use App\Models\CustomError;
 use App\Services\UserPreferencesService;
 use App\Traits\ProvidesApiJsonResponse;
 use App\Traits\ProvidesResourcesJsonResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
@@ -19,7 +19,8 @@ class UserPreferencesController extends Controller
 
     public function __construct(
         private readonly UserPreferencesService $userPreferencesService
-    ) {
+    )
+    {
         $this->middleware(["auth:sanctum", "verified"]);
         $this->setResource(UserPreferencesResource::class);
     }
@@ -29,26 +30,23 @@ class UserPreferencesController extends Controller
      *
      * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\JsonResponse
+     * @throws \App\Exceptions\CustomValidationException
+     * @throws \App\Exceptions\FailedToSaveObjectException
+     * @throws \App\Exceptions\UserNotFoundException
+     * @throws \App\Exceptions\UserPreferencesAlreadyExistsException
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         $validated = $this->customValidate(
             $request,
             $this->getValidationRules(false)
         );
-
-        $instance = $this->userPreferencesService->store(
+        $this->userPreferencesService->store(
             $request->user()->id,
             Arr::get($validated, "theme", "system"),
             Arr::get($validated, "locale", "en")
         );
-        if ($instance) {
-            return $this->successResponse(status_code: Response::HTTP_CREATED);
-        } else {
-            return $this->errorResponse(
-                error: new CustomError("user preferences were not saved!")
-            );
-        }
+        return $this->successResponse(status_code: Response::HTTP_CREATED);
     }
 
     /**

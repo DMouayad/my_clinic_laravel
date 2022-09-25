@@ -3,29 +3,31 @@
 namespace App\Services;
 
 use App\Exceptions\DeleteAttemptOfNonExistingModelException;
+use App\Exceptions\FailedToSaveObjectException;
 use App\Exceptions\UpdateRequestForNonExistingObjectException;
-use App\Exceptions\UserNotFoundException;
-use App\Exceptions\UserPreferencesAlreadyExistsException;
 use App\Models\User;
 use App\Models\UserPreferences;
+use App\Traits\ProvidesClassName;
 
 class UserPreferencesService
 {
+    use ProvidesClassName;
+
     /**
      *
-     * @param integer $user_id
+     * @param int|null $user_id
      * @param string|null $theme
      * @param string|null $locale
-     * @return UserPreferences|null
-     * @throws UserNotFoundException
-     * @throws UserPreferencesAlreadyExistsException
+     * @return UserPreferences
+     * @throws \App\Exceptions\FailedToSaveObjectException
+     * @throws \App\Exceptions\UserNotFoundException
+     * @throws \App\Exceptions\UserPreferencesAlreadyExistsException
      */
     public function store(
-        int         $user_id,
+        ?int $user_id,
         string|null $theme,
         string|null $locale
-    ): UserPreferences|null
-    {
+    ): UserPreferences {
         User::checkIfExists($user_id);
         User::checkHasPreferences($user_id);
 
@@ -36,8 +38,9 @@ class UserPreferencesService
 
         if ($user_preferences->save()) {
             return $user_preferences;
+        } else {
+            throw new FailedToSaveObjectException(self::className());
         }
-        return null;
     }
 
     /**
@@ -51,10 +54,9 @@ class UserPreferencesService
      */
     public function update(
         ?UserPreferences $user_preferences,
-        string|null      $theme,
-        string|null      $locale
-    ): bool
-    {
+        string|null $theme,
+        string|null $locale
+    ): bool {
         if ($user_preferences) {
             $user_preferences->theme = $theme ?? $user_preferences->theme;
             $user_preferences->locale = $locale ?? $user_preferences->locale;
