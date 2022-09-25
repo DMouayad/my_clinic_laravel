@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Exceptions\DeleteAttemptOfNonExistingModelException;
+use App\Exceptions\UpdateRequestForNonExistingObjectException;
 use App\Exceptions\UserNotFoundException;
 use App\Exceptions\UserPreferencesAlreadyExistsException;
 use App\Models\User;
@@ -20,10 +21,11 @@ class UserPreferencesService
      * @throws UserPreferencesAlreadyExistsException
      */
     public function store(
-        int $user_id,
+        int         $user_id,
         string|null $theme,
         string|null $locale
-    ): UserPreferences|null {
+    ): UserPreferences|null
+    {
         User::checkIfExists($user_id);
         User::checkHasPreferences($user_id);
 
@@ -41,19 +43,24 @@ class UserPreferencesService
     /**
      * Update specified UserPreferences theme and/or locale
      *
-     * @param \App\Models\UserPreferences $user_preferences
+     * @param \App\Models\UserPreferences|null $user_preferences
      * @param string|null $theme
      * @param string|null $locale
      * @return bool
+     * @throws \App\Exceptions\UpdateRequestForNonExistingObjectException
      */
     public function update(
-        UserPreferences $user_preferences,
-        string|null $theme,
-        string|null $locale
-    ): bool {
-        $user_preferences->theme = $theme ?? $user_preferences->theme;
-        $user_preferences->locale = $locale ?? $user_preferences->locale;
-        return $user_preferences->save();
+        ?UserPreferences $user_preferences,
+        string|null      $theme,
+        string|null      $locale
+    ): bool
+    {
+        if ($user_preferences) {
+            $user_preferences->theme = $theme ?? $user_preferences->theme;
+            $user_preferences->locale = $locale ?? $user_preferences->locale;
+            return $user_preferences->save();
+        }
+        throw new UpdateRequestForNonExistingObjectException();
     }
 
     /**
@@ -64,11 +71,9 @@ class UserPreferencesService
      */
     public function delete(?UserPreferences $user_preferences): bool
     {
-        // if provided UserPreferences not null, proceed with deleting it
         if ($user_preferences) {
             return $user_preferences->delete();
         }
-        // otherwise throw an exception
         throw new DeleteAttemptOfNonExistingModelException();
     }
 }

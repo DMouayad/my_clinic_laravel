@@ -103,6 +103,7 @@ class UserPreferencesController extends Controller
      * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\JsonResponse
      * @throws \App\Exceptions\CustomValidationException
+     * @throws \App\Exceptions\UpdateRequestForNonExistingObjectException
      */
     public function update(Request $request)
     {
@@ -111,23 +112,12 @@ class UserPreferencesController extends Controller
             $this->getValidationRules(true)
         );
 
-        $was_updated = $this->userPreferencesService->update(
+        $this->userPreferencesService->update(
             $request->user()->preferences,
             Arr::get($input, "theme"),
             Arr::get($input, "locale")
         );
-        if ($was_updated) {
-            return $this->successResponse(
-                status_code: Response::HTTP_NO_CONTENT
-            );
-        } else {
-            return $this->errorResponse(
-                error: new CustomError(
-                    "Failed to update the preferences of user with id " .
-                        $request->user()->id
-                )
-            );
-        }
+        return $this->successResponse(status_code: Response::HTTP_NO_CONTENT);
     }
 
     /**
