@@ -2,12 +2,12 @@
 
 namespace App\Exceptions;
 
-use App\Traits\ProvidesClassName;
+use App\Traits\ProvidesExceptionName;
 use Symfony\Component\HttpFoundation\Response;
 
 class UpdateRequestForNonExistingObjectException extends CustomException
 {
-    use ProvidesClassName;
+    use ProvidesExceptionName;
 
     public function render($request)
     {

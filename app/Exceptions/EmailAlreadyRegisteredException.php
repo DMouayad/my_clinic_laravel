@@ -2,12 +2,12 @@
 
 namespace App\Exceptions;
 
-use App\Traits\ProvidesClassName;
+use App\Traits\ProvidesExceptionName;
 use Illuminate\Http\JsonResponse;
 
 class EmailAlreadyRegisteredException extends CustomException
 {
-    use ProvidesClassName;
+    use ProvidesExceptionName;
 
     public function __construct(private string $email)
     {

@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Traits;
-trait ProvidesClassName
+trait ProvidesExceptionName
 {
     public static function className(): array|string
     {

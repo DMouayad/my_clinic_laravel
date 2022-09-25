@@ -2,12 +2,12 @@
 
 namespace App\Exceptions;
 
-use App\Traits\ProvidesClassName;
+use App\Traits\ProvidesExceptionName;
 use Illuminate\Http\JsonResponse;
 
 class PhoneNumberAlreadyUsedException extends CustomException
 {
-    use ProvidesClassName;
+    use ProvidesExceptionName;
 
     public function __construct(private string $phoneNumber)
     {
@@ -23,7 +23,7 @@ class PhoneNumberAlreadyUsedException extends CustomException
     {
         return $this->errorResponseFromException(
             $this,
-            'Phone number (' . $this->phoneNumber . ') is already used!',
+            "Phone number (" . $this->phoneNumber . ") is already used!",
             JsonResponse::HTTP_CONFLICT
         );
     }

@@ -2,19 +2,20 @@
 
 namespace App\Exceptions;
 
-use App\Traits\ProvidesClassName;
+use App\Traits\ProvidesExceptionName;
 use Throwable;
 
 class FailedToSaveObjectException extends CustomException
 {
-    use ProvidesClassName;
+    use ProvidesExceptionName;
 
     public function __construct(
         private readonly string $objectClass,
-        string $message = "",
-        int $code = 0,
-        ?Throwable $previous = null
-    ) {
+        string                  $message = "",
+        int                     $code = 0,
+        ?Throwable              $previous = null
+    )
+    {
         parent::__construct($message, $code, $previous);
     }
 

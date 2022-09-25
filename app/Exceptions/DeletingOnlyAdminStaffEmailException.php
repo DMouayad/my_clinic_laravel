@@ -2,12 +2,12 @@
 
 namespace App\Exceptions;
 
-use App\Traits\ProvidesClassName;
+use App\Traits\ProvidesExceptionName;
 use Illuminate\Http\JsonResponse;
 
 class DeletingOnlyAdminStaffEmailException extends CustomException
 {
-    use ProvidesClassName;
+    use ProvidesExceptionName;
 
     /**
      * Render the exception into an HTTP response.

@@ -3,12 +3,12 @@
 namespace App\Exceptions;
 
 use App\Models\User;
-use App\Traits\ProvidesClassName;
+use App\Traits\ProvidesExceptionName;
 use Illuminate\Http\JsonResponse;
 
 class UserDoesntMatchHisStaffEmailException extends CustomException
 {
-    use ProvidesClassName;
+    use ProvidesExceptionName;
 
     public function __construct(private User $user)
     {

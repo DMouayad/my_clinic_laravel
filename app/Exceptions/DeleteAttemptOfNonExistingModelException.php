@@ -2,13 +2,13 @@
 
 namespace App\Exceptions;
 
-use App\Traits\ProvidesClassName;
+use App\Traits\ProvidesExceptionName;
 use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 
 class DeleteAttemptOfNonExistingModelException extends CustomException
 {
-    use ProvidesClassName;
+    use ProvidesExceptionName;
 
     public function render(): JsonResponse
     {
