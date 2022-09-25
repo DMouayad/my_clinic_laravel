@@ -3,9 +3,13 @@
 namespace App\Services;
 
 use App\Exceptions\DeletingOnlyAdminStaffEmailException;
+use App\Exceptions\FailedToDeleteObjectException;
+use App\Exceptions\FailedToSaveObjectException;
+use App\Exceptions\FailedToUpdateObjectException;
 use App\Exceptions\StaffEmailAlreadyExistsException;
 use App\Models\Role;
 use App\Models\StaffEmail;
+use App\Models\User;
 
 class StaffEmailService
 {
@@ -13,8 +17,9 @@ class StaffEmailService
      * @param string $email
      * @param string $role_slug
      * @return \App\Models\StaffEmail
-     * @throws \App\Exceptions\StaffEmailAlreadyExistsException
+     * @throws \App\Exceptions\FailedToSaveObjectException
      * @throws \App\Exceptions\RoleNotFoundException
+     * @throws \App\Exceptions\StaffEmailAlreadyExistsException
      */
     public function store(string $email, string $role_slug): StaffEmail
     {
@@ -40,15 +45,22 @@ class StaffEmailService
      * returns JsonResponse of the creation process.
      * @param string $email
      * @param string $role_slug
-     * @return \App\Models\StaffEmail
+     * @return StaffEmail
+     * @throws \App\Exceptions\FailedToSaveObjectException
      * @throws \App\Exceptions\RoleNotFoundException
      */
     private function createStaffEmail(
         string $email,
         string $role_slug
     ): StaffEmail {
-        $role_id = Role::getIdBySlug($role_slug);
-        return StaffEmail::create(["email" => $email, "role_id" => $role_id]);
+        $staff_email = new StaffEmail();
+        $staff_email->email = $email;
+        $staff_email->role_id = Role::getIdBySlug($role_slug);
+
+        if (!$staff_email->save()) {
+            throw new FailedToSaveObjectException(StaffEmail::class);
+        }
+        return $staff_email;
     }
 
     /**
@@ -57,7 +69,8 @@ class StaffEmailService
      * @param \App\Models\StaffEmail $staff_email
      * @param string|null $email
      * @param string|null $role_slug
-     * @return StaffEmail
+     * @return \App\Models\StaffEmail
+     * @throws \App\Exceptions\FailedToUpdateObjectException
      * @throws \App\Exceptions\RoleNotFoundException
      * @throws \App\Exceptions\StaffEmailAlreadyExistsException
      */
@@ -67,7 +80,6 @@ class StaffEmailService
         string|null $role_slug = null
     ): StaffEmail {
         // if not the same email was provided check if it already exists in the db
-        // and if no exception was thrown => update current email
         if ($email && $staff_email->email != $email) {
             $this->checkIfStaffEmailExists($email);
             $staff_email->email = $email;
@@ -76,8 +88,9 @@ class StaffEmailService
             $staff_email->role_id = Role::getIdBySlug($role_slug);
         }
         if ($staff_email->isDirty()) {
-            $staff_email->save();
-            return $staff_email;
+            if (!$staff_email->save()) {
+                throw new FailedToUpdateObjectException(StaffEmail::class);
+            }
         }
         return $staff_email;
     }
@@ -87,6 +100,8 @@ class StaffEmailService
      * @param StaffEmail $staff_email
      * @return bool
      * @throws \App\Exceptions\DeletingOnlyAdminStaffEmailException
+     * @throws \App\Exceptions\FailedToDeleteObjectException
+     * @throws \App\Exceptions\RoleNotFoundException
      */
     public function delete(StaffEmail $staff_email): bool
     {
@@ -100,6 +115,7 @@ class StaffEmailService
      * @param StaffEmail $staff_email
      * @return void
      * @throws \App\Exceptions\DeletingOnlyAdminStaffEmailException
+     * @throws \App\Exceptions\RoleNotFoundException
      */
     private function checkCanBeDeletedIfAdmin(StaffEmail $staff_email): void
     {
@@ -119,6 +135,7 @@ class StaffEmailService
      * Delete the specified staffEmail with its user
      * @param StaffEmail $staff_email
      * @return boolean
+     * @throws \App\Exceptions\FailedToDeleteObjectException
      */
     private function performDelete(StaffEmail $staff_email): bool
     {
@@ -127,7 +144,14 @@ class StaffEmailService
         // - onDeleteCascade constraints on the 'staff_email_user' table
         // which deletes the relationship between the user and staffEmail.
         // So we cannot find staffEmail's user if the staffEmail was deleted first.
-        $staff_email->user()->delete();
-        return $staff_email->delete();
+        $user_deleted = $staff_email->user()->delete();
+        if (!$user_deleted) {
+            throw new FailedToDeleteObjectException(User::class);
+        }
+        $staffEmail_deleted = $staff_email->delete();
+        if (!$staffEmail_deleted) {
+            throw new FailedToDeleteObjectException(StaffEmail::class);
+        }
+        return true;
     }
 }

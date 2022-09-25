@@ -2,13 +2,8 @@
 
 namespace App\Http\Controllers\Api\Admin;
 
-use App\Exceptions\EmailAlreadyRegisteredException;
-use App\Exceptions\RoleNotFoundException;
-use App\Exceptions\StaffEmailAlreadyExistsException;
-use App\Exceptions\UserDoesntMatchHisStaffEmailException;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\StaffEmailResource;
-use App\Models\CustomError;
 use App\Models\StaffEmail;
 use App\Services\StaffEmailService;
 use App\Services\UserService;
@@ -63,6 +58,7 @@ class StaffEmailController extends Controller
      * @param Request $request
      * @return JsonResponse
      * @throws \App\Exceptions\CustomValidationException
+     * @throws \App\Exceptions\FailedToSaveObjectException
      * @throws \App\Exceptions\RoleNotFoundException
      * @throws \App\Exceptions\StaffEmailAlreadyExistsException
      */
@@ -96,11 +92,14 @@ class StaffEmailController extends Controller
      * @param Request $request
      * @param StaffEmail $staffEmail
      * @param UserService $userService
-     * @return JsonResponse|void
-     * @throws EmailAlreadyRegisteredException
-     * @throws RoleNotFoundException
-     * @throws StaffEmailAlreadyExistsException
-     * @throws UserDoesntMatchHisStaffEmailException
+     * @return JsonResponse
+     * @throws \App\Exceptions\CustomValidationException
+     * @throws \App\Exceptions\EmailAlreadyRegisteredException
+     * @throws \App\Exceptions\FailedToUpdateObjectException
+     * @throws \App\Exceptions\PhoneNumberAlreadyUsedException
+     * @throws \App\Exceptions\RoleNotFoundException
+     * @throws \App\Exceptions\StaffEmailAlreadyExistsException
+     * @throws \App\Exceptions\UserDoesntMatchHisStaffEmailException
      */
     public function update(
         Request $request,
@@ -116,22 +115,18 @@ class StaffEmailController extends Controller
             // update staffEmail with the provided data
             $updated_staff_email = $this->staffEmailService->update(
                 $staffEmail,
-                strtolower(Arr::get($params, "email", default: null)),
-                strtolower(Arr::get($params, "role", default: null))
+                strtolower(Arr::get($params, "email")),
+                strtolower(Arr::get($params, "role"))
             );
             // then update staffEmail's user data
-            $updated_user = $userService->update(
+            $userService->update(
                 user: $updated_staff_email->user,
                 role_id: $updated_staff_email->role_id,
                 email: $updated_staff_email->email
             );
-            // check user data was updated successfully
-            $user_was_updated = $updated_staff_email->user == $updated_user;
-            if ($user_was_updated) {
-                return $this->successResponse(
-                    status_code: Response::HTTP_NO_CONTENT
-                );
-            }
+            return $this->successResponse(
+                status_code: Response::HTTP_NO_CONTENT
+            );
         } else {
             return $this->errorResponse(
                 status_code: Response::HTTP_BAD_REQUEST
@@ -143,16 +138,12 @@ class StaffEmailController extends Controller
      * @param StaffEmail $staffEmail
      * @return JsonResponse
      * @throws \App\Exceptions\DeletingOnlyAdminStaffEmailException
+     * @throws \App\Exceptions\FailedToDeleteObjectException
+     * @throws \App\Exceptions\RoleNotFoundException
      */
     public function destroy(StaffEmail $staffEmail): JsonResponse
     {
-        $was_deleted = $this->staffEmailService->delete($staffEmail);
-        if ($was_deleted) {
-            return $this->successResponse(message: "Deleted successfully");
-        } else {
-            return $this->errorResponse(
-                new CustomError("Failed to delete the Staff email")
-            );
-        }
+        $this->staffEmailService->delete($staffEmail);
+        return $this->successResponse();
     }
 }
