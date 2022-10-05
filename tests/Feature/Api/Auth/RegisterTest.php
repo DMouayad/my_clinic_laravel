@@ -7,7 +7,7 @@ use App\Exceptions\EmailUnauthorizedToRegisterException;
 use App\Http\Middleware\EnsureStaffEmailProvided;
 use App\Services\UserService;
 use Database\Seeders\Utils\ProvidesUserSeedingData;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Testing\Fluent\AssertableJson;
@@ -19,7 +19,7 @@ use Tests\Utils\Helpers\TestingUsersHelper;
 
 class RegisterTest extends BaseApiRequestTestCase
 {
-    use ProvidesUserSeedingData, RefreshDatabase;
+    use ProvidesUserSeedingData, DatabaseMigrations;
 
     protected string $seeder = RolesAndStaffEmailDBSeeder::class;
 
