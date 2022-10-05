@@ -20,7 +20,7 @@ class UserResource extends JsonResource
             'name' => $this->name,
             'phone_number' => $this->phone_number,
             'role' => $this->whenLoaded('role'),
-            'preferences' => $this->whenLoaded('preferences'),
+            'preferences' => new  UserPreferencesResource($this->whenLoaded('preferences')),
             'email_verified_at' => $this->email_verified_at,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
