@@ -14,6 +14,9 @@ class UserPreferencesResource extends JsonResource
      */
     public function toArray($request)
     {
-        return parent::toArray($request);
+        return [
+            'theme' => $this->theme,
+            'locale' => $this->locale,
+        ];
     }
 }
