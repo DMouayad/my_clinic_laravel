@@ -21,6 +21,8 @@ class ValidateRefreshToken
      * @param \Illuminate\Http\Request $request
      * @param \Closure(\Illuminate\Http\Request): (\Illuminate\Http\Response|\Illuminate\Http\RedirectResponse)  $next
      * @return mixed
+     * @throws \App\Exceptions\CustomValidationException
+     * @throws \Illuminate\Auth\AuthenticationException
      */
     public function handle(Request $request, Closure $next)
     {
@@ -36,7 +38,7 @@ class ValidateRefreshToken
                 !$this->supportsTokens($refreshToken->tokenable)
             ) {
                 return new JsonResponse(
-                    ["message" => "invalid token"],
+                    ["message" => "invalid refresh token"],
                     status: Response::HTTP_UNAUTHORIZED
                 );
             }
