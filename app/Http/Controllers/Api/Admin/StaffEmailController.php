@@ -69,12 +69,12 @@ class StaffEmailController extends Controller
             "role" => "required|string",
         ]);
 
-        $this->staffEmailService->store(
+        $newStaffEmail = $this->staffEmailService->store(
             strtolower($params["email"]),
             strtolower($params["role"])
         );
         return $this->successResponse(
-            message: "Staff email created successfully.",
+            new StaffEmailResource($newStaffEmail->load('role')),
             status_code: Response::HTTP_CREATED
         );
     }
@@ -118,12 +118,14 @@ class StaffEmailController extends Controller
                 strtolower(Arr::get($params, "email")),
                 strtolower(Arr::get($params, "role"))
             );
-            // then update staffEmail's user data
-            $userService->update(
-                user: $updated_staff_email->user,
-                role_id: $updated_staff_email->role_id,
-                email: $updated_staff_email->email
-            );
+            // then update staffEmail's user if exists
+            if ($updated_staff_email->user) {
+                $userService->update(
+                    user: $updated_staff_email->user,
+                    role_id: $updated_staff_email->role_id,
+                    email: $updated_staff_email->email
+                );
+            }
             return $this->successResponse(
                 status_code: Response::HTTP_NO_CONTENT
             );
