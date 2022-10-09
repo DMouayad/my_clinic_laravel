@@ -139,14 +139,17 @@ class StaffEmailService
      */
     private function performDelete(StaffEmail $staff_email): bool
     {
-        // NOTE:
-        // Deleting the user before deleting the staffEmail is IMPORTANT due to:
-        // - onDeleteCascade constraints on the 'staff_email_user' table
-        // which deletes the relationship between the user and staffEmail.
-        // So we cannot find staffEmail's user if the staffEmail was deleted first.
-        $user_deleted = $staff_email->user()->delete();
-        if (!$user_deleted) {
-            throw new FailedToDeleteObjectException(User::class);
+        if ($staff_email->user) {
+
+            // NOTE:
+            // Deleting the user before deleting the staffEmail is IMPORTANT due to:
+            // - onDeleteCascade constraints on the 'staff_email_user' table
+            // which deletes the relationship between the user and staffEmail.
+            // So we cannot find staffEmail's user if the staffEmail was deleted first.
+            $user_deleted = $staff_email->user()->delete();
+            if (!$user_deleted) {
+                throw new FailedToDeleteObjectException(User::class);
+            }
         }
         $staffEmail_deleted = $staff_email->delete();
         if (!$staffEmail_deleted) {
