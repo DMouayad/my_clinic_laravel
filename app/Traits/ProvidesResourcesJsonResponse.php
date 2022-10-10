@@ -3,10 +3,13 @@
 namespace App\Traits;
 
 use App\Models\CustomError;
+use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 trait ProvidesResourcesJsonResponse
 {
+    use ProvidesOrderedQuery;
+
     private ?int $per_page = null;
     /**
      * Name of the Model's Resource class.
@@ -80,6 +83,32 @@ trait ProvidesResourcesJsonResponse
     }
 
     /**
+     * Returns a paginated CollectionResource modified according to request's query
+     *
+     * if [request] contains sort parameters it will be added to [model_query]
+     * if [request] contains page parameter, the returned collection is paginated by
+     * the amount provided using [setPerPageCount], default is [env("PAGINATION_DEFAULT_COUNT")].
+     *
+     * if[request] doesn't contain a page parameter, all items will be returned in the CollectionResource
+     * @param Request $request
+     * @param Builder $model_query
+     * @param array $relations
+     * @return \Illuminate\Http\Resources\Json\JsonResource|null
+     */
+    public function collectionOfRequestQuery(
+        Request $request,
+        \Illuminate\Database\Eloquent\Builder $model_query,
+        array $relations = []
+    ) {
+        return $this->paginatedCollection(
+            $this->queryWithSort($model_query, $request->sort)->with(
+                $relations
+            ),
+            per_page: $request->page ? null : 10000
+        );
+    }
+
+    /**
      * Returns a paginated CollectionResource of the provided model collection
      *
      * @param \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Builder $collection
@@ -94,8 +123,6 @@ trait ProvidesResourcesJsonResponse
         ?CustomError $error = null,
         ?int $per_page = null
     ) {
-        // if the resource_collection was provided we can use it to create a ResourceCollection
-        $paginated_collection = null;
         if (is_a($collection, LengthAwarePaginator::class)) {
             $paginated_collection = $collection;
         } else {
@@ -104,6 +131,11 @@ trait ProvidesResourcesJsonResponse
             );
         }
         return $this->collection($paginated_collection, $status, $error);
+    }
+
+    public function getPerPageCount()
+    {
+        return $this->per_page ?? env("PAGINATION_DEFAULT_COUNT");
     }
 
     /**
@@ -117,26 +149,23 @@ trait ProvidesResourcesJsonResponse
     public function collection(
         $collection,
         int $status = 200,
-        ?CustomError $error = null,
+        ?CustomError $error = null
     ) {
         $response_data = [
             "status" => $status,
             "error" => $error,
         ];
-
+        // if the resource_collection was provided we can use it to create a ResourceCollection
         if (isset($this->resource_collection)) {
-            return $this->resource_collection($collection)->additional($response_data);
+            return $this->resource_collection($collection)->additional(
+                $response_data
+            );
         }
-        // if resource_collection wasn't set we use the provided model Resource::collection
+        // else we use the provided model Resource::collection
         if (isset($this->resource)) {
             return $this->resource
                 ::collection($collection)
                 ->additional($response_data);
         }
-    }
-
-    public function getPerPageCount()
-    {
-        return $this->per_page ?? env("PAGINATION_DEFAULT_COUNT");
     }
 }
