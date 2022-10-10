@@ -29,29 +29,44 @@ class StaffEmailController extends Controller
     }
 
     /**
+     * @param \Illuminate\Http\Request $request
      * @return JsonResource|null
      */
-    public function getEmailsWithRoles(): ?JsonResource
+    public function getEmailsWithRoles(Request $request): ?JsonResource
     {
-        return $this->paginatedCollection(StaffEmail::with("role"));
+        return $this->collectionOfRequestQuery(
+            $request,
+            StaffEmail::query(),
+            ['role'],
+        );
     }
 
     /**
+     * @param \Illuminate\Http\Request $request
      * @return JsonResource|null
      */
-    public function getEmailsWithUsersAndRoles(): ?JsonResource
+    public function getEmailsWithUsersAndRoles(Request $request): ?JsonResource
     {
-        return $this->paginatedCollection(StaffEmail::with(["role", "user"]));
+        return $this->collectionOfRequestQuery(
+            $request,
+            StaffEmail::query(),
+            ['role', 'user'],
+        );
     }
 
     /**
      * Get a list of the staff Emails without
      * loading their role relationship.
+     *
+     * @param \Illuminate\Http\Request $request
      * @return JsonResource
      */
-    public function getEmailsOnly(): JsonResource
+    public function getEmailsOnly(Request $request): JsonResource
     {
-        return $this->paginatedCollection(StaffEmail::paginate());
+        return $this->collectionOfRequestQuery(
+            $request,
+            StaffEmail::query()
+        );
     }
 
     /**
@@ -102,10 +117,11 @@ class StaffEmailController extends Controller
      * @throws \App\Exceptions\UserDoesntMatchHisStaffEmailException
      */
     public function update(
-        Request $request,
-        StaffEmail $staffEmail,
+        Request     $request,
+        StaffEmail  $staffEmail,
         UserService $userService
-    ) {
+    )
+    {
         $params = $this->customValidate($request, [
             "email" => "nullable|email",
             "role" => "nullable|string",
