@@ -58,8 +58,7 @@ trait ProvidesResourcesJsonResponse
         $resource,
         int $status = 200,
         ?CustomError $error = null
-    ): ?\Illuminate\Http\Resources\Json\JsonResource
-    {
+    ): ?\Illuminate\Http\Resources\Json\JsonResource {
         $response_data = [
             "status" => $status,
             "error" => $error,
@@ -86,36 +85,52 @@ trait ProvidesResourcesJsonResponse
      * @param \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Builder $collection
      * @param integer $status
      * @param \App\Models\CustomError|null $error
+     * @param integer|null $per_page
      * @return \Illuminate\Http\Resources\Json\JsonResource|null
      */
     public function paginatedCollection(
         $collection,
         int $status = 200,
-        ?CustomError $error = null
-    )
-    {
-        $response_data = [
-            "status" => $status,
-            "error" => $error,
-        ];
+        ?CustomError $error = null,
+        ?int $per_page = null
+    ) {
         // if the resource_collection was provided we can use it to create a ResourceCollection
         $paginated_collection = null;
         if (is_a($collection, LengthAwarePaginator::class)) {
             $paginated_collection = $collection;
         } else {
             $paginated_collection = $collection->paginate(
-                $this->getPerPageCount()
+                $per_page ?? $this->getPerPageCount()
             );
         }
+        return $this->collection($paginated_collection, $status, $error);
+    }
+
+    /**
+     * Returns a CollectionResource of the provided model collection
+     *
+     * @param \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Builder $collection
+     * @param integer $status
+     * @param \App\Models\CustomError|null $error
+     * @return \Illuminate\Http\Resources\Json\JsonResource|null
+     */
+    public function collection(
+        $collection,
+        int $status = 200,
+        ?CustomError $error = null,
+    ) {
+        $response_data = [
+            "status" => $status,
+            "error" => $error,
+        ];
+
         if (isset($this->resource_collection)) {
-            return $this->resource_collection(
-                $paginated_collection
-            )->additional($response_data);
+            return $this->resource_collection($collection)->additional($response_data);
         }
         // if resource_collection wasn't set we use the provided model Resource::collection
         if (isset($this->resource)) {
             return $this->resource
-                ::collection($paginated_collection)
+                ::collection($collection)
                 ->additional($response_data);
         }
     }
