@@ -6,8 +6,8 @@ use App\Exceptions\CustomException;
 use App\Models\CustomError;
 use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
-
-trait ProvidesApiJsonResponse
+use Illuminate\Http\Resources\Json\JsonResource;
+trait ProvidesApiJsonResponse 
 {
     /**
      * @param array|null $data
@@ -16,7 +16,7 @@ trait ProvidesApiJsonResponse
      * @return \Illuminate\Http\JsonResponse
      */
     protected function successResponse(
-        array|null $data = null,
+        JsonResource|array|null $data = null,
         string|null $message = null,
         int $status_code = 200
     ) {
