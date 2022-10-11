@@ -5,11 +5,12 @@ namespace Tests\Unit;
 use App\Exceptions\EmailAlreadyRegisteredException;
 use App\Exceptions\PhoneNumberAlreadyUsedException;
 use App\Exceptions\UnauthorizedToDeleteUserException;
-use App\Exceptions\UserDoesntMatchHisStaffEmailException;
+use App\Exceptions\UserDoesntMatchHisStaffMemberException;
+use App\Models\StaffMember;
 use App\Services\UserService;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\TestCase;
-use Tests\Utils\CustomDatabaseSeeders\RolesAndStaffEmailDBSeeder;
+use Tests\Utils\CustomDatabaseSeeders\RolesAndStaffMemberSeeder;
 use Tests\Utils\Enums\UserRole;
 use Tests\Utils\Helpers\TestingUsersHelper;
 
@@ -20,7 +21,7 @@ class UserServiceTest extends TestCase
     use DatabaseMigrations;
 
     protected bool $seed = true;
-    protected string $seeder = RolesAndStaffEmailDBSeeder::class;
+    protected string $seeder = RolesAndStaffMemberSeeder::class;
     private TestingUsersHelper $helper;
     private UserService $userService;
 
@@ -28,15 +29,6 @@ class UserServiceTest extends TestCase
     {
         $user = $this->helper->createUserByRole(UserRole::admin);
         $this->assertModelExists($user);
-    }
-
-    public function test_creating_user_creates_staff_email_user()
-    {
-        $user = $this->helper->createUserByRole(UserRole::admin);
-        $this->assertDatabaseHas("staff_email_user", [
-            "user_id" => $user->id,
-            "staff_email_id" => $user->staffEmail->id,
-        ]);
     }
 
     public function test_creating_user_with_existing_email_throws_exception()
@@ -50,14 +42,14 @@ class UserServiceTest extends TestCase
     public function test_updating_user_data()
     {
         $user = $this->helper->createUserByRole(UserRole::admin);
+        $this->helper->assignStaffMemberUser($user);
         $new_email = "updatedEmail@myclinic.com";
         $new_phone_number = "newPhoneNumber";
-        // user's staffEmail must be updated before updating the user, otherwise,
-        // UserDoesntMatchHisStaffEmailException will be thrown
-        $user->staffEmail->update([
+        // user's staffMember must be updated before updating the user, otherwise,
+        // UserDoesntMatchHisStaffMemberException will be thrown
+        StaffMember::whereUserId($user->id)->update([
             "email" => $new_email,
             "role_id" => 2,
-            "phone_number" => $new_phone_number,
         ]);
         $updated = $this->userService->update(
             $user,
@@ -86,22 +78,24 @@ class UserServiceTest extends TestCase
         }, PhoneNumberAlreadyUsedException::class);
     }
 
-    public function test_updating_user_with_role_different_from_his_staffEmail_throws_exception()
+    public function test_updating_user_with_role_different_from_his_staffMember_throws_exception()
     {
         $this->assertThrows(function () {
             $new_role_id = 2;
             $user = $this->helper->createUserByRole(UserRole::admin);
+            $this->helper->assignStaffMemberUser($user);
             $this->userService->update($user, role_id: $new_role_id);
-        }, UserDoesntMatchHisStaffEmailException::class);
+        }, UserDoesntMatchHisStaffMemberException::class);
     }
 
-    public function test_updating_user_with_email_different_from_his_staffEmail_throws_exception()
+    public function test_updating_user_with_email_different_from_his_staffMember_throws_exception()
     {
         $this->assertThrows(function () {
             $new_email = "newEmail@myclinic.com";
             $user = $this->helper->createUserByRole(UserRole::admin);
+            $this->helper->assignStaffMemberUser($user);
             $this->userService->update($user, email: $new_email);
-        }, UserDoesntMatchHisStaffEmailException::class);
+        }, UserDoesntMatchHisStaffMemberException::class);
     }
 
     public function test_updating_user_email_throws_exception_if_already_exists()
@@ -120,10 +114,11 @@ class UserServiceTest extends TestCase
             UserRole::admin,
             store_access_token: true
         );
+        $this->helper->assignStaffMemberUser($user);
         // assert user has one access token
         $this->assertSame(1, $user->tokens->count());
 
-        $user->staffEmail->update(["email" => $new_email]);
+        StaffMember::whereUserId($user->id)->update(["email" => $new_email]);
 
         // updates user's email and role_id
         $updated = $this->userService->update($user, email: $new_email);
@@ -140,12 +135,13 @@ class UserServiceTest extends TestCase
             store_access_token: true,
             store_refresh_token: true
         );
+        $this->helper->assignStaffMemberUser($user);
 
         // assert user has one access token
         $this->assertSame(1, $user->tokens->count());
         $this->assertSame(1, $user->refreshTokens->count());
 
-        $user->staffEmail->update(["role_id" => 2]);
+        StaffMember::whereUserId($user->id)->update(["role_id" => 2]);
         // updates user's email and role_id
         $updated = $this->userService->update($user, role_id: 2);
         // get a fresh instance so tokens relationship will be updated

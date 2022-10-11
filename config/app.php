@@ -1,6 +1,6 @@
 <?php
 
-use App\Providers\StaffEmailServiceProvider;
+use App\Providers\StaffMemberServiceProvider;
 use Illuminate\Support\Facades\Facade;
 
 return [
@@ -41,7 +41,7 @@ return [
     |
     */
 
-    "debug" => (bool)env("APP_DEBUG", false),
+    "debug" => (bool) env("APP_DEBUG", false),
 
     /*
     |--------------------------------------------------------------------------
@@ -194,7 +194,7 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
 
-        StaffEmailServiceProvider::class,
+        StaffMemberServiceProvider::class,
     ],
 
     /*

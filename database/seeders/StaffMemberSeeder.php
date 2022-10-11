@@ -3,14 +3,14 @@
 namespace Database\Seeders;
 
 use App\Models\Role;
-use App\Models\StaffEmail;
-use Illuminate\Database\Seeder;
+use App\Models\StaffMember;
 use Database\Seeders\Utils\ProvidesUserSeedingData;
+use Illuminate\Database\Seeder;
 
-
-class StaffEmailSeeder extends Seeder
+class StaffMemberSeeder extends Seeder
 {
     use ProvidesUserSeedingData;
+
     /**
      * Run the database seeds.
      *
@@ -19,12 +19,10 @@ class StaffEmailSeeder extends Seeder
     public function run()
     {
         foreach ($this->users_seeding_emails as $role_slug => $email_address) {
-            StaffEmail::create(
-                [
-                    'email' => $email_address,
-                    'role_id' => Role::getIdBySlug($role_slug),
-                ]
-            );
+            StaffMember::create([
+                "email" => $email_address,
+                "role_id" => Role::getIdBySlug($role_slug),
+            ]);
         }
     }
 }

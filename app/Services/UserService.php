@@ -5,9 +5,8 @@ namespace App\Services;
 use App\Exceptions\EmailAlreadyRegisteredException;
 use App\Exceptions\PhoneNumberAlreadyUsedException;
 use App\Exceptions\UnauthorizedToDeleteUserException;
-use App\Exceptions\UserDoesntMatchHisStaffEmailException;
-use App\Models\StaffEmail;
-use App\Models\StaffEmailUser;
+use App\Exceptions\UserDoesntMatchHisStaffMemberException;
+use App\Models\StaffMember;
 use App\Models\User;
 use App\Traits\ProvidesApiJsonResponse;
 use App\Traits\UpdatesModelAttributes;
@@ -32,25 +31,18 @@ class UserService
         string $name,
         string $phone_number,
         string $password
-    ): User {
+    ): User
+    {
         $this->checkEmailAlreadyRegistered($email);
         $this->verifyPhoneNumberIsUnique($phone_number);
-        $user = User::create([
+        return User::create([
             "email" => $email,
             "name" => $name,
             "phone_number" => $phone_number,
             "password" => Hash::make($password),
-            "role_id" => StaffEmail::whereEmail($email)->first(["role_id"])
+            "role_id" => StaffMember::whereEmail($email)->first(["role_id"])
                 ->role_id,
         ]);
-        //
-        StaffEmailUser::create([
-            "user_id" => $user->id,
-            "staff_email_id" => StaffEmail::whereEmail($user->email)->first()
-                ->id,
-        ]);
-
-        return $user;
     }
 
     /**
@@ -84,15 +76,16 @@ class UserService
      * @param string|null $phone_number
      * @return \App\Models\User
      * @throws EmailAlreadyRegisteredException
-     * @throws UserDoesntMatchHisStaffEmailException
+     * @throws UserDoesntMatchHisStaffMemberException
      * @throws PhoneNumberAlreadyUsedException
      */
     public function update(
-        User $user,
-        int|null $role_id = null,
+        User        $user,
+        int|null    $role_id = null,
         string|null $email = null,
         string|null $phone_number = null
-    ): User {
+    ): User
+    {
         if ($email && $user->email != $email) {
             $this->checkEmailAlreadyRegistered($email);
             $user->email = $email;
@@ -105,33 +98,29 @@ class UserService
             $user->phone_number = $phone_number;
         }
         // It's Important Before updating user's data in DB to verify it matches his
-        // staffEmail data(role-email)
-        $this->verifyUserMatchHisStaffEmail($user);
+        // staff_member data(role-email)
+        $this->verifyUserMatchHisStaffMember($user);
         return $this->performUpdate($user);
     }
 
     /**
      *  Verifies that new user's role and email matches those assigned to him in
-     *  his StaffEmail.
+     *  his StaffMember.
      * @param \App\Models\User $user
      * @param integer $new_role_id
      * @return void
-     * @throws UserDoesntMatchHisStaffEmailException
+     * @throws UserDoesntMatchHisStaffMemberException
      */
-    private function verifyUserMatchHisStaffEmail(User $user)
+    private function verifyUserMatchHisStaffMember(User $user): void
     {
-        $has_same_role_id =
-            $user
-                ->staffEmail()
-                ->get(["role_id"])
-                ->first()->role_id == $user->role_id;
-        $has_same_email =
-            $user
-                ->staffEmail()
-                ->get(["email"])
-                ->first()->email == $user->email;
-        if (!($has_same_email && $has_same_role_id)) {
-            throw new UserDoesntMatchHisStaffEmailException($user);
+        $user_staff_member = StaffMember::where("user_id", $user->id)->first([
+            "role_id",
+            "email",
+        ]);
+        $has_same_role = $user_staff_member->role_id == $user->role_id;
+        $has_same_email = $user_staff_member->email == $user->email;
+        if (!($has_same_email && $has_same_role)) {
+            throw new UserDoesntMatchHisStaffMemberException($user);
         }
     }
 
@@ -179,7 +168,8 @@ class UserService
     private function verifyCanDeleteUser(
         User $user_to_delete,
         User $request_user
-    ) {
+    ): void
+    {
         $is_same_user = $user_to_delete->id == $request_user->id;
         $is_admin = $request_user->tokenCan("admin");
         if (!($is_admin || $is_same_user)) {

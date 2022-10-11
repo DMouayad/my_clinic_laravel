@@ -1,15 +1,15 @@
 <?php
 
-namespace Tests\Feature\Api\Admin\StaffEmail;
+namespace Tests\Feature\Api\Admin\StaffMember;
 
 use Illuminate\Testing\Fluent\AssertableJson;
 use Symfony\Component\HttpFoundation\Response;
 
-class GetStaffEmailsWithRolesTest extends BaseStaffEmailApiRequestTest
+class GetStaffMembersWithRolesTest extends BaseStaffMemberApiRequestTest
 {
     function getRouteName(): string
     {
-        return "staff-emails-with-roles";
+        return "staff-members-with-roles";
     }
 
     function getRequestMethod(): string
@@ -24,14 +24,14 @@ class GetStaffEmailsWithRolesTest extends BaseStaffEmailApiRequestTest
             fn(AssertableJson $json) => $json
                 ->has(
                     "data",
-                    config("my_clinic.seeded_staff_emails_count"),
+                    config("my_clinic.seeded_staff_members_count"),
                     fn($json) => $json->hasAll(["id", "email", "role"])
                 )
                 ->where("error", null)
                 ->where("status", Response::HTTP_OK)
                 ->where(
                     "meta.total",
-                    config("my_clinic.seeded_staff_emails_count")
+                    config("my_clinic.seeded_staff_members_count")
                 )
                 ->etc()
         );

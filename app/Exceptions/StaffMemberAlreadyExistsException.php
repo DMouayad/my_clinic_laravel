@@ -5,9 +5,13 @@ namespace App\Exceptions;
 use App\Traits\ProvidesExceptionName;
 use Illuminate\Http\JsonResponse;
 
-class DeletingOnlyAdminStaffEmailException extends CustomException
+class StaffMemberAlreadyExistsException extends CustomException
 {
     use ProvidesExceptionName;
+
+    public function __construct(private string $email)
+    {
+    }
 
     /**
      * Render the exception into an HTTP response.
@@ -19,7 +23,7 @@ class DeletingOnlyAdminStaffEmailException extends CustomException
     {
         return $this->errorResponseFromException(
             $this,
-            'Cannot delete the only admin staff email, Create another staff email with admin role before deleting this one',
+            "Email address (" . $this->email . ") already exists!",
             JsonResponse::HTTP_CONFLICT
         );
     }

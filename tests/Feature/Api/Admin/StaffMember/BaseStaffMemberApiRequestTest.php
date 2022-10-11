@@ -1,11 +1,11 @@
 <?php
 
-namespace Tests\Feature\Api\Admin\StaffEmail;
+namespace Tests\Feature\Api\Admin\StaffMember;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Utils\BaseApiRequestTestCase;
 
-abstract class BaseStaffEmailApiRequestTest extends BaseApiRequestTestCase
+abstract class BaseStaffMemberApiRequestTest extends BaseApiRequestTestCase
 {
     use RefreshDatabase;
 

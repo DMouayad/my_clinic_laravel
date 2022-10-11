@@ -4,7 +4,7 @@ namespace Tests\Feature\Api\Auth;
 
 use App\Exceptions\EmailAlreadyRegisteredException;
 use App\Exceptions\EmailUnauthorizedToRegisterException;
-use App\Http\Middleware\EnsureStaffEmailProvided;
+use App\Http\Middleware\EnsureStaffMemberEmailProvided;
 use App\Services\UserService;
 use Database\Seeders\Utils\ProvidesUserSeedingData;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
@@ -13,7 +13,7 @@ use Illuminate\Support\Str;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\Utils\BaseApiRequestTestCase;
-use Tests\Utils\CustomDatabaseSeeders\RolesAndStaffEmailDBSeeder;
+use Tests\Utils\CustomDatabaseSeeders\RolesAndStaffMemberSeeder;
 use Tests\Utils\Enums\UserRole;
 use Tests\Utils\Helpers\TestingUsersHelper;
 
@@ -21,7 +21,7 @@ class RegisterTest extends BaseApiRequestTestCase
 {
     use ProvidesUserSeedingData, DatabaseMigrations;
 
-    protected string $seeder = RolesAndStaffEmailDBSeeder::class;
+    protected string $seeder = RolesAndStaffMemberSeeder::class;
 
     function getRouteName(): string
     {
@@ -30,7 +30,7 @@ class RegisterTest extends BaseApiRequestTestCase
 
     function getMiddleware(): array
     {
-        return ["guest", EnsureStaffEmailProvided::class];
+        return ["guest", EnsureStaffMemberEmailProvided::class];
     }
 
     function getRequestMethod(): string
@@ -87,10 +87,10 @@ class RegisterTest extends BaseApiRequestTestCase
 
     function test_unauthorized_request_returns_error_response()
     {
-        $not_staffEmail_email = "randomEmail@myclinic.com";
+        $not_staffMember_email = "randomEmail@myclinic.com";
         $response = $this->makeRequest(
             data: [
-                "email" => $not_staffEmail_email,
+                "email" => $not_staffMember_email,
                 Arr::except($this->getValidRegistrationData(), "email"),
             ]
         );

@@ -1,15 +1,15 @@
 <?php
 
-namespace Tests\Feature\Api\Admin\StaffEmail;
+namespace Tests\Feature\Api\Admin\StaffMember;
 
 use Illuminate\Testing\Fluent\AssertableJson;
 use Symfony\Component\HttpFoundation\Response;
 
-class GetStaffEmailsWithoutRolesTest extends BaseStaffEmailApiRequestTest
+class GetStaffMembersWithoutRolesTest extends BaseStaffMemberApiRequestTest
 {
     public function getRouteName(): string
     {
-        return "staff-emails-only-emails";
+        return "staff-members";
     }
 
     function getRequestMethod(): string
@@ -20,8 +20,8 @@ class GetStaffEmailsWithoutRolesTest extends BaseStaffEmailApiRequestTest
     public function test_authorized_request_returns_success_response()
     {
         $response = $this->makeRequestAuthorizedByUser("admin");
-        $seeded_staff_emails_count = config(
-            "my_clinic.seeded_staff_emails_count"
+        $seeded_staff_members_count = config(
+            "my_clinic.seeded_staff_members_count"
         );
 
         $response->assertJson(
@@ -30,10 +30,10 @@ class GetStaffEmailsWithoutRolesTest extends BaseStaffEmailApiRequestTest
                 ->where("error", null)
                 ->has(
                     "data",
-                    $seeded_staff_emails_count,
+                    $seeded_staff_members_count,
                     fn($json) => $json->missing("role")->hasAll(["id", "email"])
                 )
-                ->where("meta.total", $seeded_staff_emails_count)
+                ->where("meta.total", $seeded_staff_members_count)
                 ->etc()
         );
     }

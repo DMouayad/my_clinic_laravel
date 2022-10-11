@@ -3,8 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Role;
-use App\Models\StaffEmail;
-use App\Models\StaffEmailUser;
+use App\Models\StaffMember;
 use App\Models\User;
 use Database\Seeders\Utils\ProvidesUserSeedingData;
 use Illuminate\Database\Seeder;
@@ -35,7 +34,9 @@ class UsersSeeder extends Seeder
             "role_id" => Role::getIdBySlug("admin"),
             "email_verified_at" => now(),
         ]);
-
+        StaffMember::where("email", $admin->email)->update([
+            "user_id" => $admin->id,
+        ]);
         $dentist = User::create([
             "email" => $this->users_seeding_emails["dentist"],
             "password" => Hash::make($this->default_password),
@@ -43,6 +44,9 @@ class UsersSeeder extends Seeder
             "phone_number" => $this->getRandomPhoneNum(),
             "role_id" => Role::getIdBySlug("dentist"),
             "email_verified_at" => now(),
+        ]);
+        StaffMember::where("email", $dentist->email)->update([
+            "user_id" => $dentist->id,
         ]);
 
         $secretary = User::create([
@@ -53,21 +57,8 @@ class UsersSeeder extends Seeder
             "role_id" => Role::getIdBySlug("secretary"),
             "email_verified_at" => now(),
         ]);
-        StaffEmailUser::create([
-            "user_id" => $admin->id,
-            "staff_email_id" => StaffEmail::whereEmail($admin->email)->first()
-                ->id,
-        ]);
-        StaffEmailUser::create([
-            "user_id" => $dentist->id,
-            "staff_email_id" => StaffEmail::whereEmail($dentist->email)->first()
-                ->id,
-        ]);
-        StaffEmailUser::create([
+        StaffMember::where("email", $secretary->email)->update([
             "user_id" => $secretary->id,
-            "staff_email_id" => StaffEmail::whereEmail(
-                $secretary->email
-            )->first()->id,
         ]);
     }
 }

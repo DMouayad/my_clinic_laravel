@@ -2,6 +2,7 @@
 
 namespace Tests\Utils\Helpers;
 
+use App\Models\StaffMember;
 use App\Models\User;
 use App\Services\UserService;
 use Database\Seeders\Utils\ProvidesUserSeedingData;
@@ -18,6 +19,17 @@ class TestingUsersHelper
     }
 
     /**
+     * @param \App\Models\User $user
+     * @return void
+     */
+    public function assignStaffMemberUser(User $user): void
+    {
+        StaffMember::where("email", $user->email)->update([
+            "user_id" => $user->id,
+        ]);
+    }
+
+    /**
      *
      * @param \Tests\Utils\Enums\UserRole $userRole
      * @param boolean $grant_access_token
@@ -29,11 +41,10 @@ class TestingUsersHelper
      */
     public function createUserByRole(
         UserRole $userRole,
-        bool     $grant_access_token = false,
-        bool     $store_access_token = false,
-        bool     $store_refresh_token = false
-    ): User
-    {
+        bool $grant_access_token = false,
+        bool $store_access_token = false,
+        bool $store_refresh_token = false
+    ): User {
         $role_slug = $userRole->value;
         $user = $this->userService->createNewUser(
             email: $this->users_seeding_emails[$role_slug],

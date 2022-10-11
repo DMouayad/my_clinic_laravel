@@ -3,13 +3,13 @@
 namespace Tests\Utils\CustomDatabaseSeeders;
 
 use Database\Seeders\RoleSeeder;
-use Database\Seeders\StaffEmailSeeder;
+use Database\Seeders\StaffMemberSeeder;
 use Illuminate\Database\Seeder;
 
-class RolesAndStaffEmailDBSeeder extends Seeder
+class RolesAndStaffMemberSeeder extends Seeder
 {
     public function run()
     {
-        $this->call([RoleSeeder::class, StaffEmailSeeder::class]);
+        $this->call([RoleSeeder::class, StaffMemberSeeder::class]);
     }
 }

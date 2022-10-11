@@ -14,7 +14,6 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-
 class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens, HasFactory, Notifiable, HasRefreshTokens;
@@ -24,7 +23,13 @@ class User extends Authenticatable implements MustVerifyEmail
      *
      * @var array<int, string>
      */
-    protected $fillable = ["name", "email", "password", "role_id", "phone_number"];
+    protected $fillable = [
+        "name",
+        "email",
+        "password",
+        "role_id",
+        "phone_number",
+    ];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -92,17 +97,17 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->belongsTo(Role::class, "role_id", "id");
     }
 
-    public function staffEmail()
-    {
-        return $this->hasOneThrough(
-            StaffEmail::class,
-            StaffEmailUser::class,
-            "user_id",
-            "id",
-            "id",
-            "staff_email_id"
-        );
-    }
+    //    public function staffEmail()
+    //    {
+    //        return $this->hasOneThrough(
+    //            StaffMember::class,
+    //            StaffMemberUser::class,
+    //            "user_id",
+    //            "id",
+    //            "id",
+    //            "staff_member_id"
+    //        );
+    //    }
 
     public function sendEmailVerificationNotification()
     {
@@ -116,14 +121,12 @@ class User extends Authenticatable implements MustVerifyEmail
      * @param string $device_id
      * @return void
      */
-    public function deleteDeviceTokens(string $device_id)
+    public function deleteDeviceTokens(string $device_id): void
     {
-        $this
-            ->tokens()
+        $this->tokens()
             ->where("name", $device_id)
             ->delete();
-        $this
-            ->refreshTokens()
+        $this->refreshTokens()
             ->where("name", $device_id)
             ->delete();
     }

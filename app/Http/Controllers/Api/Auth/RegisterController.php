@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Http\Middleware\EnsureStaffEmailProvided;
+use App\Http\Middleware\EnsureStaffMemberEmailProvided;
 use App\Services\UserService;
 use App\Traits\ProvidesApiJsonResponse;
 use App\Traits\ProvidesResponseTokens;
@@ -23,7 +23,7 @@ class RegisterController extends Controller
      */
     public function __construct()
     {
-        $this->middleware([EnsureStaffEmailProvided::class, "guest"]);
+        $this->middleware([EnsureStaffMemberEmailProvided::class, "guest"]);
     }
 
     /**
@@ -32,12 +32,13 @@ class RegisterController extends Controller
      * @return JsonResponse
      * @throws \App\Exceptions\EmailAlreadyRegisteredException
      * @throws \App\Exceptions\CustomValidationException
+     * @throws \App\Exceptions\PhoneNumberAlreadyUsedException
      */
     public function register(
         Request $request,
         UserService $userService
     ): JsonResponse {
-        $params = $this->customValidate($request, [
+        $validated = $this->customValidate($request, [
             "name" => "required|string",
             "email" => "required|email",
             "phone_number" => "required|string",
@@ -46,17 +47,17 @@ class RegisterController extends Controller
         ]);
 
         $user = $userService->createNewUser(
-            email: strtolower($params["email"]),
-            name: $params["name"],
-            phone_number: $params["phone_number"],
-            password: $params["password"]
+            email: strtolower($validated["email"]),
+            name: $validated["name"],
+            phone_number: $validated["phone_number"],
+            password: $validated["password"]
         );
 
         // dispatch a registered event to send a verification email to the user.
         event(new Registered($user));
 
         $role_slug = $user->role->slug;
-        $device_id = $params["device_id"];
+        $device_id = $validated["device_id"];
         $tokens = $this->getResponseTokens(
             $user->createRefreshToken($device_id),
             $user->createToken($device_id, [$role_slug])

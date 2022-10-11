@@ -2,10 +2,10 @@
 
 namespace App\Providers;
 
-use App\Services\StaffEmailService;
+use App\Services\StaffMemberService;
 use Illuminate\Support\ServiceProvider;
 
-class StaffEmailServiceProvider extends ServiceProvider
+class StaffMemberServiceProvider extends ServiceProvider
 {
     /**
      * Register services.
@@ -14,8 +14,8 @@ class StaffEmailServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->singleton(StaffEmailService::class, function ($app) {
-            return new StaffEmailService();
+        $this->app->singleton(StaffMemberService::class, function ($app) {
+            return new StaffMemberService();
         });
     }
 

@@ -1,13 +1,13 @@
 <?php
 
-namespace Tests\Feature\Api\Admin\StaffEmail;
+namespace Tests\Feature\Api\Admin\StaffMember;
 
 use App\Exceptions\RoleNotFoundException;
-use App\Exceptions\StaffEmailAlreadyExistsException;
+use App\Exceptions\StaffMemberAlreadyExistsException;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Symfony\Component\HttpFoundation\Response;
 
-class StoreStaffEmailTest extends BaseStaffEmailApiRequestTest
+class StoreStaffMemberTest extends BaseStaffMemberApiRequestTest
 {
     private array $request_data = [
         "email" => "testEmail@gmail.com",
@@ -16,7 +16,7 @@ class StoreStaffEmailTest extends BaseStaffEmailApiRequestTest
 
     function getRouteName(): string
     {
-        return "store-staff-email";
+        return "store-staff-member";
     }
 
     function getRequestMethod(): string
@@ -30,11 +30,10 @@ class StoreStaffEmailTest extends BaseStaffEmailApiRequestTest
             "admin",
             $this->request_data
         );
-
         $response->assertJson(
             fn(AssertableJson $json) => $json
                 ->has("message")
-                ->where("data", null)
+                ->where("data.email", strtolower($this->request_data["email"]))
                 ->where("status", Response::HTTP_CREATED)
         );
     }
@@ -58,10 +57,7 @@ class StoreStaffEmailTest extends BaseStaffEmailApiRequestTest
             "email" => "NotValidEmail",
             "role" => "admin",
         ];
-        $response = $this->makeRequestAuthorizedByUser(
-            "admin",
-            $invalid_data
-        );
+        $response = $this->makeRequestAuthorizedByUser("admin", $invalid_data);
         $response
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJson(
@@ -87,7 +83,7 @@ class StoreStaffEmailTest extends BaseStaffEmailApiRequestTest
                 ->where("status", Response::HTTP_CONFLICT)
                 ->where(
                     "error.exception",
-                    StaffEmailAlreadyExistsException::className()
+                    StaffMemberAlreadyExistsException::className()
                 )
                 ->etc()
         );
@@ -99,10 +95,7 @@ class StoreStaffEmailTest extends BaseStaffEmailApiRequestTest
             "email" => "testEmail@gmail.com",
             "role" => "someRole",
         ];
-        $response = $this->makeRequestAuthorizedByUser(
-            "admin",
-            $invalid_data
-        );
+        $response = $this->makeRequestAuthorizedByUser("admin", $invalid_data);
         $response
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJson(

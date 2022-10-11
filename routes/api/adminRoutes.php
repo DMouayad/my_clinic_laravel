@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\Api\Admin\StaffEmailController;
+use App\Http\Controllers\Api\Admin\StaffMemberController;
 use App\Http\Controllers\Api\User\UserController;
 
 $admin_middleware = [
@@ -23,29 +23,29 @@ Route::group($admin_middleware, function () {
 });
 
 /**
- * StaffEmail CRUD routes
+ * StaffMember CRUD routes
  */
 Route::group($admin_middleware, function () {
-    Route::apiResource("staff-emails", StaffEmailController::class)
+    Route::apiResource("staff-members", StaffMemberController::class)
         ->except("index")
         ->names([
-            "store" => "store-staff-email",
-            "update" => "update-staff-email",
-            "destroy" => "delete-staff-email",
+            "store" => "store-staff-member",
+            "update" => "update-staff-member",
+            "destroy" => "delete-staff-member",
         ]);
 
-    Route::get("staff-emails-only-emails", [
-        StaffEmailController::class,
-        "getEmailsOnly",
-    ])->name("staff-emails-only-emails");
+    Route::get("staff-members", [
+        StaffMemberController::class,
+        "getStaffMembers",
+    ])->name("staff-members");
 
-    Route::get("staff-emails-with-roles", [
-        StaffEmailController::class,
-        "getEmailsWithRoles",
-    ])->name("staff-emails-with-roles");
+    Route::get("staff-members-with-roles", [
+        StaffMemberController::class,
+        "getStaffMembersWithRoles",
+    ])->name("staff-members-with-roles");
 
-    Route::get("staff-emails", [
-        StaffEmailController::class,
-        "getEmailsWithUsersAndRoles",
-    ])->name("staff-emails-info");
+    Route::get("staff-members-all-data", [
+        StaffMemberController::class,
+        "getStaffWithUsersAndRoles",
+    ])->name("staff-members-full");
 });

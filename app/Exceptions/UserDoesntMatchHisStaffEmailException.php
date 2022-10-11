@@ -6,7 +6,7 @@ use App\Models\User;
 use App\Traits\ProvidesExceptionName;
 use Illuminate\Http\JsonResponse;
 
-class UserDoesntMatchHisStaffEmailException extends CustomException
+class UserDoesntMatchHisStaffMemberException extends CustomException
 {
     use ProvidesExceptionName;
 
@@ -24,7 +24,9 @@ class UserDoesntMatchHisStaffEmailException extends CustomException
     {
         return $this->errorResponseFromException(
             $this,
-            'Error updating email/role of the user with id (' . $this->user->id . ') due to conflict with the assigned email/role of his staff email',
+            "Error updating email/role of the user with id (" .
+                $this->user->id .
+                ") due to conflict with the assigned email/role of his staff email",
             JsonResponse::HTTP_CONFLICT
         );
     }

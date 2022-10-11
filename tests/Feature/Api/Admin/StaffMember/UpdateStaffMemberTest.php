@@ -1,21 +1,21 @@
 <?php
 
-namespace Tests\Feature\Api\Admin\StaffEmail;
+namespace Tests\Feature\Api\Admin\StaffMember;
 
 use App\Exceptions\RoleNotFoundException;
-use App\Exceptions\StaffEmailAlreadyExistsException;
+use App\Exceptions\StaffMemberAlreadyExistsException;
 use Illuminate\Routing\Exceptions\UrlGenerationException;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Symfony\Component\HttpFoundation\Response;
 
-class UpdateStaffEmailTest extends BaseStaffEmailApiRequestTest
+class UpdateStaffMemberTest extends BaseStaffMemberApiRequestTest
 {
-    private int $admin_staffEmail_id = 1;
-    private int $dentist_staffEmail_id = 2;
+    private int $admin_staffMember_id = 1;
+    private int $dentist_staffMember_id = 2;
 
     function getRouteName(): string
     {
-        return "update-staff-email";
+        return "update-staff-member";
     }
 
     function getRequestMethod(): string
@@ -25,14 +25,14 @@ class UpdateStaffEmailTest extends BaseStaffEmailApiRequestTest
 
     public function test_request_by_unauthorized_user_returns_error_response()
     {
-        $this->setRouteParameters(["staff_email" => 2]);
+        $this->setRouteParameters(["staff_member" => 2]);
 
         parent::test_request_by_unauthorized_user_returns_error_response();
     }
 
     public function test_unauthorized_request_returns_error_response()
     {
-        $this->setRouteParameters(["staff_email" => 2]);
+        $this->setRouteParameters(["staff_member" => 2]);
 
         parent::test_unauthorized_request_returns_error_response();
     }
@@ -41,7 +41,7 @@ class UpdateStaffEmailTest extends BaseStaffEmailApiRequestTest
     {
         $new_data = ["email" => "updatedEmail@gmail.com", "role" => "admin"];
         $this->setRouteParameters([
-            "staff_email" => $this->admin_staffEmail_id,
+            "staff_member" => $this->admin_staffMember_id,
         ]);
 
         $response = $this->makeRequestAuthorizedByUser("admin", $new_data);
@@ -59,7 +59,7 @@ class UpdateStaffEmailTest extends BaseStaffEmailApiRequestTest
     public function test_authorized_request_with_no_data_returns_bad_request_response()
     {
         $this->setRouteParameters([
-            "staff_email" => $this->admin_staffEmail_id,
+            "staff_member" => $this->admin_staffMember_id,
         ]);
         $response = $this->makeRequestAuthorizedByUser("admin");
         $response->assertStatus(Response::HTTP_BAD_REQUEST);
@@ -68,7 +68,7 @@ class UpdateStaffEmailTest extends BaseStaffEmailApiRequestTest
     public function test_authorized_request_with_already_existing_email_returns_exception()
     {
         $this->setRouteParameters([
-            "staff_email" => $this->dentist_staffEmail_id,
+            "staff_member" => $this->dentist_staffMember_id,
         ]);
         $already_seeded_data = [
             "email" => "admin@myclinic.com",
@@ -84,7 +84,7 @@ class UpdateStaffEmailTest extends BaseStaffEmailApiRequestTest
                 ->where("status", Response::HTTP_CONFLICT)
                 ->where(
                     "error.exception",
-                    StaffEmailAlreadyExistsException::className()
+                    StaffMemberAlreadyExistsException::className()
                 )
                 ->etc()
         );
@@ -97,7 +97,7 @@ class UpdateStaffEmailTest extends BaseStaffEmailApiRequestTest
             "role" => "someRole",
         ];
         $this->setRouteParameters([
-            "staff_email" => $this->dentist_staffEmail_id,
+            "staff_member" => $this->dentist_staffMember_id,
         ]);
         $response = $this->makeRequestAuthorizedByUser("admin", $invalid_data);
         $response

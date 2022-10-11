@@ -3,7 +3,7 @@
 namespace Tests\Utils\CustomDatabaseSeeders;
 
 use Database\Seeders\RoleSeeder;
-use Database\Seeders\StaffEmailSeeder;
+use Database\Seeders\StaffMemberSeeder;
 use Database\Seeders\UsersSeeder;
 use Illuminate\Database\Seeder;
 
@@ -13,7 +13,7 @@ class AllExceptUserPreferencesDBSeeder extends Seeder
     {
         $this->call([
             RoleSeeder::class,
-            StaffEmailSeeder::class,
+            StaffMemberSeeder::class,
             UsersSeeder::class,
         ]);
     }

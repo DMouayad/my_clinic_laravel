@@ -5,7 +5,7 @@ use App\Http\Controllers\Api\Auth\LogoutController;
 use App\Http\Controllers\Api\Auth\RegisterController;
 use App\Http\Controllers\Api\Auth\TokensController;
 use App\Http\Controllers\Api\Auth\VerificationController;
-use App\Http\Middleware\EnsureStaffEmailProvided;
+use App\Http\Middleware\EnsureStaffMemberEmailProvided;
 use DDragon\SanctumRefreshToken\Http\Middleware\ValidateRefreshToken;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -23,7 +23,7 @@ Route::post("logout", [LogoutController::class, "logout"])
 
 // register route
 Route::post("register", [RegisterController::class, "register"])
-    ->middleware(["guest", EnsureStaffEmailProvided::class])
+    ->middleware(["guest", EnsureStaffMemberEmailProvided::class])
     ->name("api-register");
 
 // verify email route

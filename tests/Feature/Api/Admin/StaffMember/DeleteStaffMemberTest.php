@@ -1,18 +1,17 @@
 <?php
 
-namespace Tests\Feature\Api\Admin\StaffEmail;
+namespace Tests\Feature\Api\Admin\StaffMember;
 
-use App\Exceptions\DeletingOnlyAdminStaffEmailException;
+use App\Exceptions\DeletingOnlyAdminStaffMemberException;
 use Illuminate\Routing\Exceptions\UrlGenerationException;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-class DeleteStaffEmailTest extends BaseStaffEmailApiRequestTest
+class DeleteStaffMemberTest extends BaseStaffMemberApiRequestTest
 {
     function getRouteName(): string
     {
-        return "delete-staff-email";
+        return "delete-staff-member";
     }
 
     function getRequestMethod(): string
@@ -22,29 +21,23 @@ class DeleteStaffEmailTest extends BaseStaffEmailApiRequestTest
 
     public function test_request_by_unauthorized_user_returns_error_response()
     {
-        $this->setRouteParameters(["staff_email" => 2]);
+        $this->setRouteParameters(["staff_member" => 2]);
 
         parent::test_request_by_unauthorized_user_returns_error_response();
     }
 
     public function test_unauthorized_request_returns_error_response()
     {
-        $this->setRouteParameters(["staff_email" => 2]);
+        $this->setRouteParameters(["staff_member" => 2]);
 
         parent::test_unauthorized_request_returns_error_response();
     }
 
     public function test_authorized_request_returns_success_response()
     {
-        $this->setRouteParameters(["staff_email" => 2]);
+        $this->setRouteParameters(["staff_member" => 2]);
         $response = $this->makeRequestAuthorizedByUser("admin");
-        $response->assertStatus(Response::HTTP_OK)->assertJson(
-            fn(AssertableJson $json) => $json
-                ->where("data", null)
-                ->where("status", Response::HTTP_OK)
-                ->missing("errors")
-                ->has("message")
-        );
+        $response->assertStatus(Response::HTTP_NO_CONTENT);
     }
 
     public function test_authorized_request_with_missing_parameter_throws_exception()
@@ -54,26 +47,26 @@ class DeleteStaffEmailTest extends BaseStaffEmailApiRequestTest
         }, UrlGenerationException::class);
     }
 
-    public function test_authorized_request_with_invalid_staffEmail_id()
+    public function test_authorized_request_with_invalid_staffMember_id()
     {
-        // add the id of to-be-deleted StaffEmail as a parameter in request url
+        // add the id of to-be-deleted StaffMember as a parameter in request url
         $this->setRouteParameters([
-            "staff_email" => "NotAnID-Or-IDForNonExistingInstance",
+            "staff_member" => "NotAnID-Or-IDForNonExistingInstance",
         ]);
 
         $response = $this->makeRequestAuthorizedByUser("admin");
         $response->assertStatus(Response::HTTP_NOT_FOUND)->assertJson(
             fn(AssertableJson $json) => $json
-                ->where("exception", NotFoundHttpException::class)
+                ->where("exception", "ModelNotFoundException")
                 ->has("message")
                 ->etc()
         );
     }
 
-    public function test_deleting_the_only_admin_staffEmail_returns_exception()
+    public function test_deleting_the_only_admin_staffMember_returns_exception()
     {
-        // add the id of to-be-deleted StaffEmail as a parameter in request url
-        $this->setRouteParameters(["staff_email" => 1]);
+        // add the id of to-be-deleted StaffMember as a parameter in request url
+        $this->setRouteParameters(["staff_member" => 1]);
 
         $response = $this->makeRequestAuthorizedByUser("admin");
         $response->assertStatus(Response::HTTP_CONFLICT)->assertJson(
@@ -81,7 +74,7 @@ class DeleteStaffEmailTest extends BaseStaffEmailApiRequestTest
                 ->where("status", Response::HTTP_CONFLICT)
                 ->where(
                     "error.exception",
-                    DeletingOnlyAdminStaffEmailException::className()
+                    DeletingOnlyAdminStaffMemberException::className()
                 )
                 ->etc()
         );

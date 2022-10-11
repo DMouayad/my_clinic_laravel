@@ -3,13 +3,13 @@
 namespace App\Http\Middleware;
 
 use App\Exceptions\EmailUnauthorizedToRegisterException;
-use App\Models\StaffEmail;
+use App\Models\StaffMember;
 use App\Traits\ProvidesApiJsonResponse;
 use App\Traits\ProvidesCustomRequestValidator;
 use Closure;
 use Illuminate\Http\Request;
 
-class EnsureStaffEmailProvided
+class EnsureStaffMemberEmailProvided
 {
     use ProvidesApiJsonResponse, ProvidesCustomRequestValidator;
 
@@ -26,9 +26,12 @@ class EnsureStaffEmailProvided
             "email" => "required|email",
         ])["email"];
 
-        $staff_email = StaffEmail::where("email", $email_to_register)->first();
+        $staff_member = StaffMember::where(
+            "email",
+            $email_to_register
+        )->first();
 
-        if ($staff_email) {
+        if ($staff_member) {
             return $next($request);
         } else {
             throw new EmailUnauthorizedToRegisterException($email_to_register);
