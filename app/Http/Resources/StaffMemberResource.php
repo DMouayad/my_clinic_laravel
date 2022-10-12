@@ -17,6 +17,7 @@ class StaffMemberResource extends JsonResource
         return [
             "id" => $this->id,
             "email" => $this->email,
+            "created_at" => $this->created_at,
             "role" => $this->whenLoaded("role"),
             "user" => new UserResource($this->whenLoaded("user")),
         ];
