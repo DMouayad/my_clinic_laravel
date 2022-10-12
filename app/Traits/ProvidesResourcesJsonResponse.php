@@ -2,8 +2,9 @@
 
 namespace App\Traits;
 
+use App\Helpers\CollectionPaginationHelper;
 use App\Models\CustomError;
-use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 trait ProvidesResourcesJsonResponse
@@ -83,32 +84,6 @@ trait ProvidesResourcesJsonResponse
     }
 
     /**
-     * Returns a paginated CollectionResource modified according to request's query
-     *
-     * if [request] contains sort parameters it will be added to [model_query]
-     * if [request] contains page parameter, the returned collection is paginated by
-     * the amount provided using [setPerPageCount], default is [env("PAGINATION_DEFAULT_COUNT")].
-     *
-     * if[request] doesn't contain a page parameter, all items will be returned in the CollectionResource
-     * @param Request $request
-     * @param Builder $model_query
-     * @param array $relations
-     * @return \Illuminate\Http\Resources\Json\JsonResource|null
-     */
-    public function collectionOfRequestQuery(
-        Request $request,
-        \Illuminate\Database\Eloquent\Builder $model_query,
-        array $relations = []
-    ) {
-        return $this->paginatedCollection(
-            $this->queryWithSort($model_query, $request->sort)->with(
-                $relations
-            ),
-            per_page: $request->page ? null : 10000
-        );
-    }
-
-    /**
      * Returns a paginated CollectionResource of the provided model collection
      *
      * @param \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Builder $collection
@@ -125,8 +100,13 @@ trait ProvidesResourcesJsonResponse
     ) {
         if (is_a($collection, LengthAwarePaginator::class)) {
             $paginated_collection = $collection;
-        } else {
+        } elseif (method_exists($collection, "paginate")) {
             $paginated_collection = $collection->paginate(
+                $per_page ?? $this->getPerPageCount()
+            );
+        } elseif (is_a($collection, Collection::class)) {
+            $paginated_collection = CollectionPaginationHelper::paginate(
+                $collection,
                 $per_page ?? $this->getPerPageCount()
             );
         }
