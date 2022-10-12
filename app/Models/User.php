@@ -85,6 +85,18 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasOne(UserPreferences::class);
     }
 
+    /**
+     * @param array $relations
+     * @return \Illuminate\Database\Eloquent\Builder|\App\Models\User
+     * @throws \App\Exceptions\RoleNotFoundException
+     */
+    public static function staffUsersQuery(
+        array $relations = []
+    ): \Illuminate\Database\Eloquent\Builder|User {
+        $patient_role_id = Role::getIdBySlug("patient");
+        return User::whereNot("role_id", $patient_role_id)->with($relations);
+    }
+
     public function roleSlug(): string
     {
         return $this->role()
@@ -96,18 +108,6 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->belongsTo(Role::class, "role_id", "id");
     }
-
-    //    public function staffEmail()
-    //    {
-    //        return $this->hasOneThrough(
-    //            StaffMember::class,
-    //            StaffMemberUser::class,
-    //            "user_id",
-    //            "id",
-    //            "id",
-    //            "staff_member_id"
-    //        );
-    //    }
 
     public function sendEmailVerificationNotification()
     {
