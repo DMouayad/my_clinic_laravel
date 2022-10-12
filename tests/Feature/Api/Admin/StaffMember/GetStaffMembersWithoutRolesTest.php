@@ -31,7 +31,9 @@ class GetStaffMembersWithoutRolesTest extends BaseStaffMemberApiRequestTest
                 ->has(
                     "data",
                     $seeded_staff_members_count,
-                    fn($json) => $json->missing("role")->hasAll(["id", "email"])
+                    fn($json) => $json
+                        ->missing("role")
+                        ->hasAll(["id", "email", "created_at"])
                 )
                 ->where("meta.total", $seeded_staff_members_count)
                 ->etc()

@@ -25,7 +25,12 @@ class GetStaffMembersWithRolesTest extends BaseStaffMemberApiRequestTest
                 ->has(
                     "data",
                     config("my_clinic.seeded_staff_members_count"),
-                    fn($json) => $json->hasAll(["id", "email", "role"])
+                    fn($json) => $json->hasAll([
+                        "id",
+                        "email",
+                        "role",
+                        "created_at",
+                    ])
                 )
                 ->where("error", null)
                 ->where("status", Response::HTTP_OK)
