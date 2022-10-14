@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Laravel\Sanctum\PersonalAccessToken as SanctumPersonalAccessToken;
 
-class PersonalAccessToken extends SanctumPersonalAccessToken
+class ModifiedPersonalAccessToken extends SanctumPersonalAccessToken
 {
     /**
      * Limit saving of PersonalAccessToken records
@@ -16,7 +16,7 @@ class PersonalAccessToken extends SanctumPersonalAccessToken
      * @param array $options
      * @return bool
      */
-    public function save(array $options = [])
+    public function save(array $options = []): bool
     {
         $changes = $this->getDirty();
         // Check for 2 changed values because one is always the updated_at column
