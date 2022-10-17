@@ -1,11 +1,11 @@
 <?php
 
-use App\Http\Controllers\Api\Auth\LoginController;
-use App\Http\Controllers\Api\Auth\LogoutController;
-use App\Http\Controllers\Api\Auth\RegisterController;
-use App\Http\Controllers\Api\Auth\TokensController;
-use App\Http\Controllers\Api\Auth\VerificationController;
-use App\Http\Middleware\EnsureStaffMemberEmailProvided;
+use App\Api\Admin\StaffMembers\Middleware\EnsureStaffMemberEmailProvided;
+use App\Api\Auth\Controllers\LoginController;
+use App\Api\Auth\Controllers\LogoutController;
+use App\Api\Auth\Controllers\RegisterController;
+use App\Api\Auth\Controllers\TokensController;
+use App\Api\Auth\Controllers\VerificationController;
 use DDragon\SanctumRefreshToken\Http\Middleware\ValidateRefreshToken;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;

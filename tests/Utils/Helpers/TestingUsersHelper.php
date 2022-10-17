@@ -2,10 +2,10 @@
 
 namespace Tests\Utils\Helpers;
 
-use App\Models\StaffMember;
 use App\Models\User;
 use App\Services\UserService;
 use Database\Seeders\Utils\ProvidesUserSeedingData;
+use Domain\StaffMembers\Models\StaffMember;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 use Tests\Utils\Enums\UserRole;

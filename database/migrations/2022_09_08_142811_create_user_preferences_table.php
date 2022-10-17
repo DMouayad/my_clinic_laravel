@@ -5,8 +5,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      *
@@ -14,11 +13,15 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('user_preferences', function (Blueprint $table) {
+        Schema::create("user_preferences", function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(User::class, 'user_id')->unique()->constrained()->cascadeOnDelete();
-            $table->string('theme')->nullable();
-            $table->string('locale')->nullable();
+            $table
+                ->foreignIdFor(User::class, "user_id")
+                ->unique()
+                ->constrained()
+                ->cascadeOnDelete();
+            $table->string("theme")->nullable();
+            $table->string("locale")->nullable();
             $table->timestamps();
         });
     }
@@ -30,6 +33,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('user_preferences');
+        Schema::dropIfExists("user_preferences");
     }
 };

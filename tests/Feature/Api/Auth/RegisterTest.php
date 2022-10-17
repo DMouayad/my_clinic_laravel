@@ -2,9 +2,9 @@
 
 namespace Tests\Feature\Api\Auth;
 
+use App\Api\Admin\StaffMembers\Middleware\EnsureStaffMemberEmailProvided;
 use App\Exceptions\EmailAlreadyRegisteredException;
 use App\Exceptions\EmailUnauthorizedToRegisterException;
-use App\Http\Middleware\EnsureStaffMemberEmailProvided;
 use App\Services\UserService;
 use Database\Seeders\Utils\ProvidesUserSeedingData;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
@@ -12,8 +12,8 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Symfony\Component\HttpFoundation\Response;
-use Tests\Utils\BaseApiRequestTestCase;
 use Tests\Utils\CustomDatabaseSeeders\RolesAndStaffMemberSeeder;
+use Tests\Utils\CustomTestCases\BaseApiRequestTestCase;
 use Tests\Utils\Enums\UserRole;
 use Tests\Utils\Helpers\TestingUsersHelper;
 

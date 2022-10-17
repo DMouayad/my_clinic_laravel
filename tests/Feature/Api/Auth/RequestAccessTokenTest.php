@@ -7,7 +7,7 @@ use DDragon\SanctumRefreshToken\Http\Middleware\ValidateRefreshToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Symfony\Component\HttpFoundation\Response;
-use Tests\Utils\BaseApiRequestTestCase;
+use Tests\Utils\CustomTestCases\BaseApiRequestTestCase;
 
 class RequestAccessTokenTest extends BaseApiRequestTestCase
 {

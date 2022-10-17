@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-use App\Models\UserPreferences;
+use Domain\UserPreferences\Models\UserPreferences;
 use Illuminate\Database\Seeder;
 
 class UserPreferencesSeeder extends Seeder
@@ -18,9 +18,9 @@ class UserPreferencesSeeder extends Seeder
         $users = User::all();
         foreach ($users as $user) {
             UserPreferences::create([
-                'user_id' => $user->id,
-                'theme' => 'dark',
-                'locale' => 'en',
+                "user_id" => $user->id,
+                "theme" => "dark",
+                "locale" => "en",
             ]);
         }
     }

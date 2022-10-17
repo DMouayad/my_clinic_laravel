@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Api\Admin\StaffMember;
 
-use App\Exceptions\DeletingOnlyAdminStaffMemberException;
+use Domain\StaffMembers\Exceptions\DeletingOnlyAdminStaffMemberException;
 use Illuminate\Routing\Exceptions\UrlGenerationException;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Symfony\Component\HttpFoundation\Response;

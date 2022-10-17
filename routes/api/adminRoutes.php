@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Controllers\Api\Admin\StaffMemberController;
-use App\Http\Controllers\Api\User\UserController;
+use App\Api\Admin\StaffMembers\Controllers\StaffMemberController;
+use App\Api\Users\Controllers\UserController;
 
 $admin_middleware = [
     "middleware" => ["auth:sanctum", "ability:admin", "verified"],
@@ -34,18 +34,15 @@ Route::group($admin_middleware, function () {
             "destroy" => "delete-staff-member",
         ]);
 
-    Route::get("staff-members", [
-        StaffMemberController::class,
-        "getStaffMembers",
-    ])->name("staff-members");
+    Route::controller(StaffMemberController::class)->group(function () {
+        Route::get("staff-members", "index")->name("staff-members");
 
-    Route::get("staff-members-with-roles", [
-        StaffMemberController::class,
-        "getStaffMembersWithRoles",
-    ])->name("staff-members-with-roles");
+        Route::get("staff-members-with-roles", "indexWithRoles")->name(
+            "staff-members-with-roles"
+        );
 
-    Route::get("staff-members-all-data", [
-        StaffMemberController::class,
-        "getStaffWithUsersAndRoles",
-    ])->name("staff-members-full");
+        Route::get("staff-members-all-data", "indexWithRolesAndUsers")->name(
+            "staff-members-full"
+        );
+    });
 });

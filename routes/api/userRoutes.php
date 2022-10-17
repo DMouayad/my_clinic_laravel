@@ -2,17 +2,18 @@
 
 namespace Routes\Api;
 
-use App\Http\Controllers\Api\User\UserController;
+use App\Api\Users\Controllers\UserController;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::group(["middleware" => ["auth:sanctum", "verified"]], function () {
-    Route::get("me", [UserController::class, "show"])->name("get-my-info");
-    Route::delete("me", [UserController::class, "deleteMyAccount"])->name(
-        "delete-my-account"
-    );
-});
+Route::middleware(["auth:sanctum", "verified"])
+    ->controller(UserController::class)
+    ->group(function () {
+        Route::put("me", "update")->name("update-my-info");
+        Route::get("me", "show")->name("get-my-info");
+        Route::delete("me", "destroy")->name("delete-my-account");
+    });
 
 Route::post("/email/verification-notification", function (Request $request) {
     $request->user()->sendEmailVerificationNotification();

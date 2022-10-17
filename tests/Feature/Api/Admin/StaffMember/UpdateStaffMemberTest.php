@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Api\Admin\StaffMember;
 
-use App\Exceptions\RoleNotFoundException;
-use App\Exceptions\StaffMemberAlreadyExistsException;
+use Domain\StaffMembers\Exceptions\StaffMemberAlreadyExistsException;
+use Domain\Users\Exceptions\RoleNotFoundException;
 use Illuminate\Routing\Exceptions\UrlGenerationException;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Symfony\Component\HttpFoundation\Response;

@@ -4,7 +4,7 @@ namespace Tests\Feature\Api\Admin\Users;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Symfony\Component\HttpFoundation\Response;
-use Tests\Utils\BaseApiRequestTestCase;
+use Tests\Utils\CustomTestCases\BaseApiRequestTestCase;
 
 abstract class BaseUserApiRequestTest extends BaseApiRequestTestCase
 {

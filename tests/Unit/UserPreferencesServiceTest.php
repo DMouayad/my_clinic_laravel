@@ -2,9 +2,9 @@
 
 namespace Tests\Unit;
 
-use App\Exceptions\UserNotFoundException;
 use App\Models\User;
 use App\Services\UserPreferencesService;
+use Domain\Users\Exceptions\UserNotFoundException;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\TestCase;
 use Tests\Utils\CustomDatabaseSeeders\AllExceptUserPreferencesDBSeeder;

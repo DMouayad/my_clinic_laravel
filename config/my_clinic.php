@@ -1,6 +1,9 @@
 <?php
 
 return [
+    "PER_PAGE_DEFAULT_COUNT" => 15,
+    "USERS_PER_PAGE" => 15,
+
     /*
     |--------------------------------------------------------------------------
     | Delete old access and refresh tokens for a specified device when a new

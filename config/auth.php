@@ -42,7 +42,6 @@ return [
         "api" => [
             "driver" => "sanctum",
             "provider" => "users",
-
         ],
     ],
 
@@ -66,13 +65,13 @@ return [
     "providers" => [
         "users" => [
             "driver" => "eloquent",
-            "model" => App\Models\User::class,
+            "model" => "User",
         ],
 
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
+        //        "users" => [
+        //            "driver" => "database",
+        //            "table" => "users",
+        //        ],
     ],
 
     /*

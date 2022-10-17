@@ -3,8 +3,8 @@
 namespace Tests\Feature\Api\UserPreferences;
 
 use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Tests\Utils\BaseApiRequestTestCase;
 use Tests\Utils\CustomDatabaseSeeders\AllExceptUserPreferencesDBSeeder;
+use Tests\Utils\CustomTestCases\BaseApiRequestTestCase;
 
 abstract class BaseUserPreferencesApiRequestTest extends BaseApiRequestTestCase
 {

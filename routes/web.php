@@ -1,6 +1,7 @@
-
 <?php
 
 
 Auth::routes(['logout']);
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Route::get('/home', function () {
+    return view('home');
+})->name('home');

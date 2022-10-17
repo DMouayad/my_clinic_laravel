@@ -3,7 +3,7 @@
 namespace Tests\Feature\Api\Admin\StaffMember;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\Utils\BaseApiRequestTestCase;
+use Tests\Utils\CustomTestCases\BaseApiRequestTestCase;
 
 abstract class BaseStaffMemberApiRequestTest extends BaseApiRequestTestCase
 {

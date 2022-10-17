@@ -2,13 +2,13 @@
 
 namespace Tests\Unit;
 
-use App\Exceptions\DeletingOnlyAdminStaffMemberException;
-use App\Exceptions\RoleNotFoundException;
-use App\Exceptions\StaffMemberAlreadyExistsException;
-use App\Models\StaffMember;
 use App\Services\StaffMemberService;
 use Database\Seeders\RoleSeeder;
 use Database\Seeders\Utils\ProvidesUserSeedingData;
+use Domain\StaffMembers\Exceptions\DeletingOnlyAdminStaffMemberException;
+use Domain\StaffMembers\Exceptions\StaffMemberAlreadyExistsException;
+use Domain\StaffMembers\Models\StaffMember;
+use Domain\Users\Exceptions\RoleNotFoundException;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\TestCase;
 

@@ -2,10 +2,11 @@
 
 namespace Database\Seeders;
 
-use App\Models\Role;
-use App\Models\StaffMember;
 use App\Models\User;
 use Database\Seeders\Utils\ProvidesUserSeedingData;
+use Database\Seeders\Utils\UserSeedingData;
+use Domain\StaffMembers\Models\StaffMember;
+use Domain\Users\Models\Role;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -13,13 +14,6 @@ use Illuminate\Support\Facades\Schema;
 
 class UsersSeeder extends Seeder
 {
-    use ProvidesUserSeedingData;
-
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
     public function run()
     {
         Schema::disableForeignKeyConstraints();
@@ -27,22 +21,22 @@ class UsersSeeder extends Seeder
         Schema::enableForeignKeyConstraints();
 
         $admin = User::create([
-            "email" => $this->users_seeding_emails["admin"],
-            "password" => Hash::make($this->default_password),
+            "email" => UserSeedingData::emails["admin"],
+            "password" => Hash::make(UserSeedingData::default_password),
             "name" => "admin1",
-            "phone_number" => $this->getRandomPhoneNum(),
-            "role_id" => Role::getIdBySlug("admin"),
+            "phone_number" => UserSeedingData::getRandomPhoneNum(),
+            "role_id" => Role::getIdWhereSlug("admin"),
             "email_verified_at" => now(),
         ]);
         StaffMember::where("email", $admin->email)->update([
             "user_id" => $admin->id,
         ]);
         $dentist = User::create([
-            "email" => $this->users_seeding_emails["dentist"],
-            "password" => Hash::make($this->default_password),
+            "email" => UserSeedingData::emails["dentist"],
+            "password" => Hash::make(UserSeedingData::default_password),
             "name" => "dentist1",
-            "phone_number" => $this->getRandomPhoneNum(),
-            "role_id" => Role::getIdBySlug("dentist"),
+            "phone_number" => UserSeedingData::getRandomPhoneNum(),
+            "role_id" => Role::getIdWhereSlug("dentist"),
             "email_verified_at" => now(),
         ]);
         StaffMember::where("email", $dentist->email)->update([
@@ -50,11 +44,11 @@ class UsersSeeder extends Seeder
         ]);
 
         $secretary = User::create([
-            "email" => $this->users_seeding_emails["secretary"],
-            "password" => Hash::make($this->default_password),
+            "email" => UserSeedingData::emails["secretary"],
+            "password" => Hash::make(UserSeedingData::default_password),
             "name" => "secretary1",
-            "phone_number" => $this->getRandomPhoneNum(),
-            "role_id" => Role::getIdBySlug("secretary"),
+            "phone_number" => UserSeedingData::getRandomPhoneNum(),
+            "role_id" => Role::getIdWhereSlug("secretary"),
             "email_verified_at" => now(),
         ]);
         StaffMember::where("email", $secretary->email)->update([

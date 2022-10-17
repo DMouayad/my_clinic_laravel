@@ -4,17 +4,18 @@ namespace Tests\Feature\Api\Auth;
 
 use App\Exceptions\CustomValidationException;
 use App\Exceptions\InvalidEmailCredentialException;
-use Database\Seeders\Utils\ProvidesUserSeedingData;
+use Database\Seeders\Utils\UserSeedingData;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Symfony\Component\HttpFoundation\Response;
-use Tests\Utils\BaseApiRequestTestCase;
+use Tests\Utils\CustomTestCases\BaseApiRequestTestCase;
 
 class LoginTest extends BaseApiRequestTestCase
 {
+    use RefreshDatabase;
+
     protected bool $seed = true;
-    use ProvidesUserSeedingData, RefreshDatabase;
 
     function getRouteName(): string
     {
@@ -64,8 +65,8 @@ class LoginTest extends BaseApiRequestTestCase
     private function getValidLoginData(): array
     {
         return [
-            "email" => $this->users_seeding_emails["admin"],
-            "password" => $this->default_password,
+            "email" => UserSeedingData::emails["admin"],
+            "password" => UserSeedingData::default_password,
             "device_id" => Str::random(),
         ];
     }
