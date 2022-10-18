@@ -23,7 +23,6 @@ class UserPreferencesController extends Controller
 
     public function __construct()
     {
-        $this->middleware(["auth:sanctum", "verified"]);
         $this->setResource(UserPreferencesResource::class);
     }
 

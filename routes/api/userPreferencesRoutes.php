@@ -5,7 +5,7 @@ namespace Routes\Api;
 use App\Api\UserPreferences\Controllers\UserPreferencesController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(["auth:sanctum", "verified"])
+Route::middleware(["auth:sanctum"])
     ->name("user.preferences.")
     ->controller(UserPreferencesController::class)
     ->group(function () {
