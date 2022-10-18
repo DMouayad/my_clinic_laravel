@@ -17,6 +17,8 @@ class StaffMemberSeeder extends Seeder
      */
     public function run()
     {
+        StaffMember::factory(500)->create();
+
         foreach (UserSeedingData::emails as $role_slug => $email_address) {
             StaffMember::create([
                 "email" => $email_address,
