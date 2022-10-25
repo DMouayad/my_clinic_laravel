@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
-use App\Notifications\SendQueuedEmailVerificationNotification;
 use DDragon\SanctumRefreshToken\HasRefreshTokens;
 use Domain\UserPreferences\Models\UserPreferences;
 use Domain\Users\DataTransferObjects\UpdateUserData;
+use Domain\Users\DataTransferObjects\UserData;
 use Domain\Users\Exceptions\UserNotFoundException;
 use Domain\Users\Models\Role;
+use Domain\Users\Notifications\SendQueuedEmailVerificationNotification;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -34,6 +35,7 @@ class User extends Authenticatable implements MustVerifyEmail
      * Check if there's a user with the provided ID
      *
      * @param integer $user_id
+     *
      * @return void
      * @throws UserNotFoundException
      */
@@ -66,6 +68,7 @@ class User extends Authenticatable implements MustVerifyEmail
      * the specified device id
      *
      * @param string $device_id
+     *
      * @return void
      */
     public function deleteDeviceTokens(string $device_id): void

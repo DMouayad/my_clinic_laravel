@@ -13,25 +13,9 @@ abstract class BaseUserPreferencesApiRequestTest extends BaseApiRequestTestCase
     protected bool $seed = true;
     protected string $seeder = AllExceptUserPreferencesDBSeeder::class;
 
-    /**
-     * @test
-     */
-    public function test_route_has_specified_middleware()
-    {
-        $this->assertRouteContainsMiddleware();
-    }
-
-    //    protected function setUp(): void
-    //    {
-    //        parent::setUp();
-    //        Schema::disableForeignKeyConstraints();
-    //        DB::table("user_preferences")->truncate();
-    //        Schema::enableForeignKeyConstraints();
-    //    }
-
     function getMiddleware(): array
     {
-        return ["auth:sanctum", "verified"];
+        return ["auth:sanctum"];
     }
 
     public function test_unauthorized_request_returns_error_response()
@@ -44,5 +28,13 @@ abstract class BaseUserPreferencesApiRequestTest extends BaseApiRequestTestCase
     {
         $response = $this->makeRequest();
         $response->assertUnauthorized();
+    }
+
+    /**
+     * @test
+     */
+    public function test_route_has_specified_middleware()
+    {
+        $this->assertRouteContainsMiddleware();
     }
 }

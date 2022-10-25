@@ -36,7 +36,7 @@ abstract class BaseApiRequestTestCase extends TestCase
 
     public function assertRouteContainsMiddleware(): void
     {
-        $route = $this->getRouteByName($this->getRouteName());
+        $route = $this->getRouteByName();
 
         foreach ($this->getMiddleware() as $name) {
             $this->assertContains(
@@ -51,15 +51,15 @@ abstract class BaseApiRequestTestCase extends TestCase
      * @param string $route_name
      * @return Route
      */
-    public function getRouteByName(string $route_name): Route
+    public function getRouteByName(): Route
     {
         $routes = \Illuminate\Support\Facades\Route::getRoutes();
 
         /** @var Route $route */
-        $route = $routes->getByName($route_name);
+        $route = $routes->getByName($this->getRouteName());
 
         if (!$route) {
-            $this->fail("Route with name [{$route_name}] not found!");
+            $this->fail("Route with name [{$this->getRouteName()}] not found!");
         }
 
         return $route;
@@ -127,7 +127,6 @@ abstract class BaseApiRequestTestCase extends TestCase
         ?User $user = null
     ): TestResponse {
         Sanctum::actingAs($user ?? $this->getUser($role), [$role]);
-
         return $this->json(
             $this->getRequestMethod(),
             $this->getRouteUri(),
@@ -139,7 +138,7 @@ abstract class BaseApiRequestTestCase extends TestCase
     public function getUser(string $ability): User
     {
         $role_id = Role::getIdWhereSlug($ability);
-        $user = User::whereRoleId($role_id)->first();
+        $user = User::where("role_id", $role_id)->first();
         $user->createToken("test_token", [$ability])->plainTextToken;
         return $user;
     }

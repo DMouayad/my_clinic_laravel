@@ -5,6 +5,7 @@ namespace Tests\Feature\Api\UserPreferences;
 use App\Exceptions\DeleteAttemptOfNonExistingModelException;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Testing\Fluent\AssertableJson;
+use Support\Helpers\ClassNameStringifier;
 use Symfony\Component\HttpFoundation\Response;
 
 class DeleteUserPreferencesTest extends BaseUserPreferencesApiRequestTest
@@ -19,7 +20,7 @@ class DeleteUserPreferencesTest extends BaseUserPreferencesApiRequestTest
 
     function getRouteName(): string
     {
-        return "user.preferences.delete";
+        return "my_preferences.delete";
     }
 
     function test_authorized_request_returns_success_response()
@@ -42,7 +43,7 @@ class DeleteUserPreferencesTest extends BaseUserPreferencesApiRequestTest
                 fn(AssertableJson $json) => $json
                     ->where(
                         "error.exception",
-                        DeleteAttemptOfNonExistingModelException::className()
+                        ClassNameStringifier::getClassName(DeleteAttemptOfNonExistingModelException::class)
                     )
                     ->etc()
             );

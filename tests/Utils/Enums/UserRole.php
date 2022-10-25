@@ -8,4 +8,5 @@ enum UserRole: string
     case dentist = "dentist";
     case secretary = "secretary";
     case patient = "patient";
+    case invalid = "invalid_role";
 }

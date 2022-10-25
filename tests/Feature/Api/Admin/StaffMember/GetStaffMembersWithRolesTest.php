@@ -23,8 +23,7 @@ class GetStaffMembersWithRolesTest extends BaseStaffMemberApiRequestTest
         $response->assertJson(
             fn(AssertableJson $json) => $json
                 ->has(
-                    "data",
-                    config("my_clinic.seeded_staff_members_count"),
+                    "data.0",
                     fn($json) => $json->hasAll([
                         "id",
                         "email",
@@ -34,10 +33,6 @@ class GetStaffMembersWithRolesTest extends BaseStaffMemberApiRequestTest
                 )
                 ->where("error", null)
                 ->where("status", Response::HTTP_OK)
-                ->where(
-                    "meta.total",
-                    config("my_clinic.seeded_staff_members_count")
-                )
                 ->etc()
         );
     }

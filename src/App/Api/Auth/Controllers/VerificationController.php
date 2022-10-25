@@ -5,6 +5,7 @@ namespace App\Api\Auth\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\CustomError;
 use App\Models\User;
+use Domain\Users\Events\WasVerified;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -48,8 +49,8 @@ class VerificationController extends Controller
 
         if (
             !hash_equals(
-                (string) $request->route("id"),
-                (string) $user->getKey()
+                (string)$request->route("id"),
+                (string)$user->getKey()
             )
         ) {
             throw new AuthorizationException();
@@ -57,7 +58,7 @@ class VerificationController extends Controller
 
         if (
             !hash_equals(
-                (string) $request->route("hash"),
+                (string)$request->route("hash"),
                 sha1($user->getEmailForVerification())
             )
         ) {
@@ -71,6 +72,7 @@ class VerificationController extends Controller
             );
         }
         $user->markEmailAsVerified();
+        event(new WasVerified($user));
         return $this->successResponse(
             message: "User email was verified successfully"
         );

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api\Admin\StaffMember;
 
+use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Utils\CustomTestCases\BaseApiRequestTestCase;
 
@@ -10,6 +11,7 @@ abstract class BaseStaffMemberApiRequestTest extends BaseApiRequestTestCase
     use RefreshDatabase;
 
     protected bool $seed = true;
+    protected string $seeder = DatabaseSeeder::class;
 
     function getMiddleware(): array
     {

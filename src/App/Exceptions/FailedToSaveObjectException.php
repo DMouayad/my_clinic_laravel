@@ -2,6 +2,7 @@
 
 namespace App\Exceptions;
 
+use Support\Helpers\ClassNameStringifier;
 use Support\Traits\ExtractsExceptionName;
 use Throwable;
 
@@ -11,10 +12,11 @@ class FailedToSaveObjectException extends CustomException
 
     public function __construct(
         private readonly string $objectClass,
-        string $message = "",
-        int $code = 0,
-        ?Throwable $previous = null
-    ) {
+        string                  $message = "",
+        int                     $code = 0,
+        ?Throwable              $previous = null
+    )
+    {
         parent::__construct($message, $code, $previous);
     }
 
@@ -27,7 +29,7 @@ class FailedToSaveObjectException extends CustomException
     {
         return $this->errorResponseFromException(
             $this,
-            "Failed to save object of type $this->objectClass!"
+            "Failed to save object of type " . ClassNameStringifier::getClassName($this->objectClass)
         );
     }
 }

@@ -7,7 +7,7 @@ use App\Api\Users\Resources\UserResource;
 use App\Http\Controllers\Controller;
 use Domain\Users\Actions\DeleteUserAction;
 use Domain\Users\Actions\UpdateUserAction;
-use Domain\Users\DataTransferObjects\UpdateUserData;
+use Domain\Users\DataTransferObjects\UserData;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Support\Traits\ProvidesApiJsonResponse;
@@ -54,7 +54,7 @@ class UserController extends Controller
     public function update(UpdateUserRequest $request, UpdateUserAction $action)
     {
         $validated = $request->validated();
-        $action->execute($request->user(), UpdateUserData::new(...$validated));
+        $action->execute($request->user(), UserData::forUpdate(...$validated));
         return $this->successResponse(status_code: Response::HTTP_NO_CONTENT);
     }
 }

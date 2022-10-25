@@ -2,25 +2,51 @@
 
 namespace Tests\Unit\StaffMember\Actions;
 
-use Database\Seeders\RoleSeeder;
 use Domain\StaffMembers\Actions\AddStaffMemberAction;
+use Domain\StaffMembers\Exceptions\StaffMemberAlreadyExistsException;
 use Domain\StaffMembers\Factories\StaffMemberDataFactory;
 use Domain\Users\Exceptions\RoleNotFoundException;
-use Tests\Utils\CustomTestCases\BaseActionTestCaseWithRefreshDatabase;
+use Tests\Utils\Enums\UserRole;
 use TypeError;
 
-class AddStaffMemberActionTest extends BaseActionTestCaseWithRefreshDatabase
+class AddStaffMemberActionTest extends BaseStaffMemberActionTest
 {
-    public function getSeederClass(): string
+    public function test_execution_with_invalid_role_slug_throws_exception()
     {
-        return RoleSeeder::class;
+        $this->expectException(RoleNotFoundException::class);
+        $this->createStaffMember(role: UserRole::invalid);
+    }
+
+    public function test_execution_with_an_existing_email_throws_exception()
+    {
+        $this->expectException(StaffMemberAlreadyExistsException::class);
+        // setup
+        $data_factory = StaffMemberDataFactory::new();
+        $first_data = $data_factory->forCreate();
+        // create for 1st time
+        $staff_member = $this->action()->execute($first_data);
+        $this->assertModelExists($staff_member);
+        // create for 2nd time
+        $this->action()->execute(
+            $data_factory->withEmail($first_data->email)->forCreate()
+        );
+    }
+
+    public function action(): AddStaffMemberAction
+    {
+        return app(AddStaffMemberAction::class);
+    }
+
+    protected function setUp(bool $should_create_staff_member = false): void
+    {
+        parent::setUp($should_create_staff_member);
     }
 
     public function test_execution_with_valid_data_is_success(): void
     {
         $staff_member_data = StaffMemberDataFactory::new()->create();
-        $action = app(AddStaffMemberAction::class);
-        $staff_member = $action->execute($staff_member_data);
+
+        $staff_member = $this->action()->execute($staff_member_data);
 
         $this->assertModelExists($staff_member);
     }
@@ -28,20 +54,7 @@ class AddStaffMemberActionTest extends BaseActionTestCaseWithRefreshDatabase
     public function test_execution_with_invalid_data_is_failure(): void
     {
         $this->expectException(TypeError::class);
-        $staff_member_data = StaffMemberDataFactory::new()
-            ->nullAttributes()
-            ->create();
-        $action = app(AddStaffMemberAction::class);
-        $action->execute($staff_member_data);
-    }
-
-    public function test_execution_with_invalid_role_slug_throws_exception()
-    {
-        $this->expectException(RoleNotFoundException::class);
-        $staff_member_data = StaffMemberDataFactory::new()
-            ->withRole("RandomRole")
-            ->create();
-        $action = app(AddStaffMemberAction::class);
-        $action->execute($staff_member_data);
+        $staff_member_data = StaffMemberDataFactory::new()->createWithNullAttributes();
+        $this->action()->execute($staff_member_data);
     }
 }

@@ -7,12 +7,7 @@ use This;
 
 class DatabaseSeeder extends Seeder
 {
-    private $seeders = [];
 
-    public static function all()
-    {
-        $clonse = self::class;
-    }
 
     /**
      * Seed the application's database.

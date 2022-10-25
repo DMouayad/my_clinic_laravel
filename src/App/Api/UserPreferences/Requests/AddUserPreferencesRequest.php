@@ -4,15 +4,15 @@ namespace App\Api\UserPreferences\Requests;
 
 use Illuminate\Validation\Rule;
 
-class CreateUserPreferencesRequest extends BaseUserPreferencesRequest
+class AddUserPreferencesRequest extends BaseUserPreferencesRequest
 {
     public function getThemeRules(): array|string
     {
-        return [
-            "required",
-            "string",
-            Rule::in(explode(",", config("my_clinic.supported_theme_modes"))),
-        ];
+        $supported_themes = explode(
+            ",",
+            config("my_clinic.supported_theme_modes")
+        );
+        return ["required", "string", Rule::in($supported_themes)];
     }
 
     public function getLocaleRules(): array|string

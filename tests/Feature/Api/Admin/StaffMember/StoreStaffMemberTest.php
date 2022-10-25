@@ -3,8 +3,10 @@
 namespace Tests\Feature\Api\Admin\StaffMember;
 
 use Domain\StaffMembers\Exceptions\StaffMemberAlreadyExistsException;
+use Domain\StaffMembers\Models\StaffMember;
 use Domain\Users\Exceptions\RoleNotFoundException;
 use Illuminate\Testing\Fluent\AssertableJson;
+use Support\Helpers\ClassNameStringifier;
 use Symfony\Component\HttpFoundation\Response;
 
 class StoreStaffMemberTest extends BaseStaffMemberApiRequestTest
@@ -71,7 +73,7 @@ class StoreStaffMemberTest extends BaseStaffMemberApiRequestTest
     public function test_store_already_existing_email_returns_exception()
     {
         $already_seeded_data = [
-            "email" => "admin@myclinic.com",
+            "email" => StaffMember::query()->first()->email,
             "role" => "admin",
         ];
         $response = $this->makeRequestAuthorizedByUser(
@@ -83,7 +85,9 @@ class StoreStaffMemberTest extends BaseStaffMemberApiRequestTest
                 ->where("status", Response::HTTP_CONFLICT)
                 ->where(
                     "error.exception",
-                    StaffMemberAlreadyExistsException::className()
+                    ClassNameStringifier::getClassName(
+                        StaffMemberAlreadyExistsException::class
+                    )
                 )
                 ->etc()
         );
@@ -103,7 +107,9 @@ class StoreStaffMemberTest extends BaseStaffMemberApiRequestTest
                     ->where("status", Response::HTTP_UNPROCESSABLE_ENTITY)
                     ->where(
                         "error.exception",
-                        RoleNotFoundException::className()
+                        ClassNameStringifier::getClassName(
+                            RoleNotFoundException::class
+                        )
                     )
                     ->etc()
             );

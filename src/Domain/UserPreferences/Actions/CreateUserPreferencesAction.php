@@ -3,18 +3,32 @@
 namespace Domain\UserPreferences\Actions;
 
 use App\Exceptions\FailedToSaveObjectException;
+use App\Exceptions\UpdateRequestForNonExistingObjectException;
 use Domain\UserPreferences\DataTransferObjects\UserPreferencesData;
+use Domain\UserPreferences\Exceptions\ProvidedLocalePreferenceNotValidException;
+use Domain\UserPreferences\Exceptions\ProvidedThemePreferenceNotValidException;
 use Domain\UserPreferences\Models\UserPreferences;
+use Domain\UserPreferences\Traits\ValidatesUserPreferencesData;
+use Domain\Users\Exceptions\UserNotFoundException;
 
 class CreateUserPreferencesAction
 {
+    use ValidatesUserPreferencesData;
+
     public function __construct(
         private readonly UpdateUserPreferencesAction $updateUserPreferencesAction
     ) {
     }
 
     /**
-     * @throws \App\Exceptions\FailedToSaveObjectException
+     * @param  UserPreferencesData  $data
+     *
+     * @return UserPreferences
+     * @throws FailedToSaveObjectException
+     * @throws UpdateRequestForNonExistingObjectException
+     * @throws ProvidedLocalePreferenceNotValidException
+     * @throws ProvidedThemePreferenceNotValidException
+     * @throws UserNotFoundException
      */
     public function execute(UserPreferencesData $data): UserPreferences
     {
@@ -23,6 +37,7 @@ class CreateUserPreferencesAction
             $this->updateUserPreferencesAction->execute($preferences, $data);
             return $preferences->refresh();
         } else {
+            $this->validateData($data, forCreate: true);
             return $this->create_preferences($data);
         }
     }

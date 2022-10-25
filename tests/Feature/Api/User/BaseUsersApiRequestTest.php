@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Tests\Feature\Api\User;
 
@@ -13,7 +14,7 @@ abstract class BaseUsersApiRequestTest extends BaseApiRequestTestCase
 
     function getMiddleware(): array
     {
-        return ["auth:sanctum", "verified"];
+        return ["auth:sanctum"];
     }
 
     public function test_unauthorized_request_returns_error_response()

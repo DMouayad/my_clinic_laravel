@@ -3,8 +3,8 @@
 namespace Tests\Feature\Api\UserPreferences;
 
 use App\Exceptions\CustomValidationException;
-use App\Exceptions\UserPreferencesAlreadyExistsException;
 use Illuminate\Testing\Fluent\AssertableJson;
+use Support\Helpers\ClassNameStringifier;
 use Symfony\Component\HttpFoundation\Response;
 
 class StoreUserPreferencesTest extends BaseUserPreferencesApiRequestTest
@@ -16,7 +16,7 @@ class StoreUserPreferencesTest extends BaseUserPreferencesApiRequestTest
 
     function getRouteName(): string
     {
-        return "user.preferences.add";
+        return "my_preferences.add";
     }
 
     function test_authorized_request_returns_success_response()
@@ -41,8 +41,7 @@ class StoreUserPreferencesTest extends BaseUserPreferencesApiRequestTest
         ];
     }
 
-
-    public function test_store_userPreferences_for_user_with_preferences_returns_exception()
+    public function test_store_userPreferences_for_user_with_preferences_updates_existing_ones()
     {
         $user = $this->getUser("admin");
         // save preferences for first time
@@ -50,31 +49,16 @@ class StoreUserPreferencesTest extends BaseUserPreferencesApiRequestTest
             data: $this->get_valid_request_data(),
             user: $user
         );
+        $other_data = [
+            "theme" => "light",
+            "locale" => "ar",
+        ];
         // add preferences for the same user
         $response = $this->makeRequestAuthorizedByUser(
-            data: $this->get_valid_request_data(),
+            data: $other_data,
             user: $user
         );
-        $response
-            ->assertStatus(Response::HTTP_CONFLICT)
-            ->assertJson(
-                fn(AssertableJson $json) => $json
-                    ->where("status", Response::HTTP_CONFLICT)
-                    ->has(
-                        "error",
-                        fn(AssertableJson $json) => $json
-                            ->hasAll([
-                                "message",
-                                "description",
-                                "exception",
-                                "code",
-                            ])
-                            ->where(
-                                "exception",
-                                UserPreferencesAlreadyExistsException::className()
-                            )
-                    )
-            );
+        $response->assertStatus(Response::HTTP_CREATED);
     }
 
     public function test_request_with_no_data_returns_validation_exception()
@@ -90,7 +74,9 @@ class StoreUserPreferencesTest extends BaseUserPreferencesApiRequestTest
                     ])
                     ->where(
                         "error.exception",
-                        CustomValidationException::className()
+                        ClassNameStringifier::getClassName(
+                            CustomValidationException::class
+                        )
                     )
                     ->etc()
             );
@@ -114,7 +100,9 @@ class StoreUserPreferencesTest extends BaseUserPreferencesApiRequestTest
                     ])
                     ->where(
                         "error.exception",
-                        CustomValidationException::className()
+                        ClassNameStringifier::getClassName(
+                            CustomValidationException::class
+                        )
                     )
                     ->etc()
             );
