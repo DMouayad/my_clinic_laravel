@@ -11,7 +11,7 @@ class UserNotFoundException extends CustomException
     {
     }
 
-    public function render($request)
+    public function render()
     {
         return $this->errorResponseFromException(
             $this,

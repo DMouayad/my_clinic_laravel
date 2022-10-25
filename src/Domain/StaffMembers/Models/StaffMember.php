@@ -8,6 +8,7 @@ use Domain\StaffMembers\Factories\StaffMemberFactory;
 use Domain\Users\Models\Role;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 /**
  * Represents a clinic's staff member.
@@ -22,9 +23,34 @@ class StaffMember extends Model
     protected $fillable = ["email", "role_id"];
     protected $hidden = ["created_at", "updated_at", "user_id", "role_id"];
 
-    public static function whereUserId(int $user_id)
+    public static function findWhereEmail(string $email): self
     {
-        return StaffMember::where("user_id", $user_id);
+        $staff_member = StaffMember::where("email", $email)->first();
+        if (!$staff_member) {
+            throw new ModelNotFoundException(
+                "StaffMember with email (" . $email . ") not found!"
+            );
+        }
+        return $staff_member;
+    }
+
+    public static function findWhereRole(string $role): self
+    {
+        $staff_member = StaffMember::where(
+            "role_id",
+            Role::getIdWhereSlug($role)
+        )->first();
+        if (!$staff_member) {
+            throw new ModelNotFoundException(
+                "StaffMember with role (" . $role . ") not found!"
+            );
+        }
+        return $staff_member;
+    }
+
+    public static function whereUserId(int $user_id): self
+    {
+        return StaffMember::where("user_id", $user_id)->first();
     }
 
     protected static function newFactory()
@@ -44,14 +70,6 @@ class StaffMember extends Model
         return $this->belongsTo(Role::class, "role_id");
     }
 
-    /**
-     * get the user which have registered using the same email address.
-     */
-    public function user()
-    {
-        return $this->belongsTo(User::class, "user_id");
-    }
-
     public function updateFromData(StaffMemberData $data): self
     {
         $this->email = $data->email ?? $this->email;
@@ -59,6 +77,15 @@ class StaffMember extends Model
             $this->role_id =
                 Role::getIdWhereSlug($data->role) ?? $this->role_id;
         }
+        $this->user_id = $data->user_id ?? $this->user_id;
         return $this;
+    }
+
+    /**
+     * get the user which have registered using the same email address.
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class, "user_id");
     }
 }

@@ -34,7 +34,7 @@ class TokensController extends Controller
         // create new refresh and access tokens
         $tokens = $this->getResponseTokens(
             $user->createRefreshToken($device_id),
-            $user->createToken($device_id, [$user->role()->slug])
+            $user->createToken($device_id, [$user->role->slug])
         );
         return $this->successResponse($tokens);
     }

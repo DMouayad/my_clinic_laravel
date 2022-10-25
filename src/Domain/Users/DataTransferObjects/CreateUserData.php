@@ -1,21 +1,17 @@
 <?php
 
 namespace Domain\Users\DataTransferObjects;
-
-use Domain\StaffMembers\Models\StaffMember;
-
 class CreateUserData
 {
-     readonly int $role_id;
+     readonly string $email;
 
     public function __construct(
-        readonly string $email,
+        string $email,
         readonly string $name,
         readonly string $phone_number,
-        readonly string $password
+        readonly string $password,
+        readonly int $role_id
     ) {
-        $this->role_id = StaffMember::where("email", $this->email)->first([
-            "role_id",
-        ])->role_id;
+        $this->email = $email ? strtolower($email) : null;
     }
 }

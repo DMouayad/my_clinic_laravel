@@ -3,10 +3,10 @@
 namespace Tests\Feature\Api\UserPreferences;
 
 use App\Exceptions\CustomValidationException;
-use App\Exceptions\UpdateRequestForNonExistingObjectException;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Testing\Fluent\AssertableJson;
+use Support\Helpers\ClassNameStringifier;
 use Symfony\Component\HttpFoundation\Response;
 
 class UpdateUserPreferencesTest extends BaseUserPreferencesApiRequestTest
@@ -20,7 +20,7 @@ class UpdateUserPreferencesTest extends BaseUserPreferencesApiRequestTest
 
     function getRouteName(): string
     {
-        return "user.preferences.update";
+        return "my_preferences.update";
     }
 
     function test_authorized_request_returns_success_response()
@@ -38,29 +38,6 @@ class UpdateUserPreferencesTest extends BaseUserPreferencesApiRequestTest
             "locale" => "en",
             "theme" => "dark",
         ];
-    }
-
-    public function test_request_with_no_data_returns_validation_exception()
-    {
-        $response = $this->makeRequestAuthorizedByUser("admin");
-        $response
-            ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
-            ->assertJson(
-                fn(AssertableJson $json) => $json
-                    ->where("error.description", [
-                        "theme" => [
-                            "The theme field is required when locale is not present.",
-                        ],
-                        "locale" => [
-                            "The locale field is required when theme is not present.",
-                        ],
-                    ])
-                    ->where(
-                        "error.exception",
-                        CustomValidationException::className()
-                    )
-                    ->etc()
-            );
     }
 
     public function test_request_with_invalid_data_returns_error_response()
@@ -81,31 +58,50 @@ class UpdateUserPreferencesTest extends BaseUserPreferencesApiRequestTest
                     ])
                     ->where(
                         "error.exception",
-                        CustomValidationException::className()
+                        ClassNameStringifier::getClassName(
+                            CustomValidationException::class
+                        )
                     )
                     ->etc()
             );
     }
 
-    function test_updating_non_existing_preferences_returns_error_response()
+    public function test_request_with_no_data_returns_validation_exception()
+    {
+        $response = $this->makeRequestAuthorizedByUser("admin");
+        $response
+            ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
+            ->assertJson(
+                fn(AssertableJson $json) => $json
+                    ->where("error.description", [
+                        "theme" => [
+                            "The theme field is required when locale is not present.",
+                        ],
+                        "locale" => [
+                            "The locale field is required when theme is not present.",
+                        ],
+                    ])
+                    ->where(
+                        "error.exception",
+                        ClassNameStringifier::getClassName(
+                            CustomValidationException::class
+                        )
+                    )
+                    ->etc()
+            );
+    }
+
+    function test_updating_non_existing_preferences_returns_success()
     {
         DB::table("user_preferences")->delete();
         // assert table is is empty
         $this->assertDatabaseCount("user_preferences", 0);
         // make delete request
+
         $response = $this->makeRequestAuthorizedByUser(
             "admin",
             data: ["theme" => "system"]
         );
-        $response
-            ->assertNotFound()
-            ->assertJson(
-                fn(AssertableJson $json) => $json
-                    ->where(
-                        "error.exception",
-                        UpdateRequestForNonExistingObjectException::className()
-                    )
-                    ->etc()
-            );
+        $response->assertSuccessful();
     }
 }

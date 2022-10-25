@@ -2,9 +2,13 @@
 
 namespace App\Api\UserPreferences\Controllers;
 
-use App\Api\UserPreferences\Requests\CreateUserPreferencesRequest;
+use App\Api\UserPreferences\Requests\AddUserPreferencesRequest;
 use App\Api\UserPreferences\Requests\UpdateUserPreferencesRequest;
 use App\Api\UserPreferences\Resources\UserPreferencesResource;
+use App\Exceptions\DeleteAttemptOfNonExistingModelException;
+use App\Exceptions\FailedToDeleteObjectException;
+use App\Exceptions\FailedToSaveObjectException;
+use App\Exceptions\UpdateRequestForNonExistingObjectException;
 use App\Http\Controllers\Controller;
 use Domain\UserPreferences\Actions\CreateUserPreferencesAction;
 use Domain\UserPreferences\Actions\DeleteUserPreferencesAction;
@@ -12,6 +16,7 @@ use Domain\UserPreferences\Actions\UpdateUserPreferencesAction;
 use Domain\UserPreferences\DataTransferObjects\UserPreferencesData;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Arr;
 use Support\Traits\ProvidesApiJsonResponse;
 use Support\Traits\ProvidesResourcesJsonResponse;
@@ -27,18 +32,20 @@ class UserPreferencesController extends Controller
     }
 
     /**
-     * @throws \App\Exceptions\FailedToSaveObjectException
+     * @throws FailedToSaveObjectException
+     * @throws UpdateRequestForNonExistingObjectException
+     * @throws \Domain\Users\Exceptions\UserNotFoundException
      */
     public function store(
-        CreateUserPreferencesRequest $request,
+        AddUserPreferencesRequest $request,
         CreateUserPreferencesAction $action
     ): JsonResponse {
         $validated = $request->validated();
         $action->execute(
             UserPreferencesData::forCreate(
+                user_id: $request->user()->id,
                 theme: $validated["theme"],
-                locale: $validated["locale"],
-                user_id: $request->user()->id
+                locale: $validated["locale"]
             )
         );
         return $this->successResponse(status_code: Response::HTTP_CREATED);
@@ -47,7 +54,7 @@ class UserPreferencesController extends Controller
     /**
      * Display the specified resource.
      *
-     * @return \Illuminate\Http\Resources\Json\JsonResource|null
+     * @return JsonResource|null
      */
     public function show(Request $request)
     {
@@ -55,8 +62,8 @@ class UserPreferencesController extends Controller
     }
 
     /**
-     * @throws \App\Exceptions\FailedToSaveObjectException
-     * @throws \App\Exceptions\UpdateRequestForNonExistingObjectException
+     * @throws FailedToSaveObjectException
+     * @throws UpdateRequestForNonExistingObjectException
      */
     public function update(
         UpdateUserPreferencesRequest $request,
@@ -66,17 +73,17 @@ class UserPreferencesController extends Controller
         $action->execute(
             user_preferences: $request->user()->preferences,
             data: UserPreferencesData::forUpdate(
+                user_id: $request->user()->id,
                 theme: Arr::get($validated, "theme"),
-                locale: Arr::get($validated, "locale"),
-                user_id: $request->user()->id
+                locale: Arr::get($validated, "locale")
             )
         );
         return $this->successResponse(status_code: Response::HTTP_NO_CONTENT);
     }
 
     /**
-     * @throws \App\Exceptions\FailedToDeleteObjectException
-     * @throws \App\Exceptions\DeleteAttemptOfNonExistingModelException
+     * @throws FailedToDeleteObjectException
+     * @throws DeleteAttemptOfNonExistingModelException
      */
     public function destroy(
         Request $request,

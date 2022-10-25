@@ -2,7 +2,8 @@
 
 namespace Tests\Feature\Api\Auth;
 
-use Database\Seeders\Utils\ProvidesUserSeedingData;
+use App\Models\User;
+use Database\Seeders\Utils\UserSeedingData;
 use DDragon\SanctumRefreshToken\Http\Middleware\ValidateRefreshToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Testing\Fluent\AssertableJson;
@@ -11,7 +12,7 @@ use Tests\Utils\CustomTestCases\BaseApiRequestTestCase;
 
 class RequestAccessTokenTest extends BaseApiRequestTestCase
 {
-    use RefreshDatabase, ProvidesUserSeedingData;
+    use RefreshDatabase;
 
     protected bool $seed = true;
     protected $testing_device_id = "testingId";
@@ -87,8 +88,8 @@ class RequestAccessTokenTest extends BaseApiRequestTestCase
             "post",
             route("api-login"),
             data: [
-                "email" => $this->users_seeding_emails["admin"],
-                "password" => $this->default_password,
+                "email" => User::query()->first(["email"])->email,
+                "password" => UserSeedingData::default_password,
                 "device_id" => $this->testing_device_id,
             ]
         );

@@ -6,6 +6,7 @@ use App\Exceptions\CustomException;
 use App\Models\CustomError;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Support\Helpers\ClassNameStringifier;
 use Symfony\Component\HttpFoundation\Response;
 
 trait ProvidesApiJsonResponse
@@ -48,7 +49,7 @@ trait ProvidesApiJsonResponse
             new CustomError(
                 message: $message ?? $e->getMessage(),
                 code: $e->getCode(),
-                exception: substr(strrchr(get_class($e), "\\"), 1),
+                exception: ClassNameStringifier::getClassName($e),
                 description: $description
             ),
             $status_code

@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Database\Seeders\Utils\ProvidesUserSeedingData;
 use Database\Seeders\Utils\UserSeedingData;
 use Domain\StaffMembers\Models\StaffMember;
 use Domain\Users\Models\Role;
@@ -17,7 +16,7 @@ class StaffMemberSeeder extends Seeder
      */
     public function run()
     {
-        StaffMember::factory(500)->create();
+        //        StaffMember::factory(500)->create();
 
         foreach (UserSeedingData::emails as $role_slug => $email_address) {
             StaffMember::create([

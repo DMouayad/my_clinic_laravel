@@ -6,6 +6,7 @@ use Domain\StaffMembers\Exceptions\StaffMemberAlreadyExistsException;
 use Domain\Users\Exceptions\RoleNotFoundException;
 use Illuminate\Routing\Exceptions\UrlGenerationException;
 use Illuminate\Testing\Fluent\AssertableJson;
+use Support\Helpers\ClassNameStringifier;
 use Symfony\Component\HttpFoundation\Response;
 
 class UpdateStaffMemberTest extends BaseStaffMemberApiRequestTest
@@ -49,22 +50,6 @@ class UpdateStaffMemberTest extends BaseStaffMemberApiRequestTest
         $response->assertStatus(Response::HTTP_NO_CONTENT);
     }
 
-    public function test_authorized_request_with_missing_parameters_throws_exception()
-    {
-        $this->assertThrows(function () {
-            $this->makeRequestAuthorizedByUser("admin");
-        }, UrlGenerationException::class);
-    }
-
-    public function test_authorized_request_with_no_data_returns_bad_request_response()
-    {
-        $this->setRouteParameters([
-            "staff_member" => $this->admin_staffMember_id,
-        ]);
-        $response = $this->makeRequestAuthorizedByUser("admin");
-        $response->assertStatus(Response::HTTP_BAD_REQUEST);
-    }
-
     public function test_authorized_request_with_already_existing_email_returns_exception()
     {
         $this->setRouteParameters([
@@ -84,7 +69,9 @@ class UpdateStaffMemberTest extends BaseStaffMemberApiRequestTest
                 ->where("status", Response::HTTP_CONFLICT)
                 ->where(
                     "error.exception",
-                    StaffMemberAlreadyExistsException::className()
+                    ClassNameStringifier::getClassName(
+                        StaffMemberAlreadyExistsException::class
+                    )
                 )
                 ->etc()
         );
@@ -107,9 +94,27 @@ class UpdateStaffMemberTest extends BaseStaffMemberApiRequestTest
                     ->where("status", Response::HTTP_UNPROCESSABLE_ENTITY)
                     ->where(
                         "error.exception",
-                        RoleNotFoundException::className()
+                        ClassNameStringifier::getClassName(
+                            RoleNotFoundException::class
+                        )
                     )
                     ->etc()
             );
+    }
+
+    public function test_authorized_request_with_missing_parameters_throws_exception()
+    {
+        $this->assertThrows(function () {
+            $this->makeRequestAuthorizedByUser("admin");
+        }, UrlGenerationException::class);
+    }
+
+    public function test_authorized_request_with_no_data_returns_bad_request_response()
+    {
+        $this->setRouteParameters([
+            "staff_member" => $this->admin_staffMember_id,
+        ]);
+        $response = $this->makeRequestAuthorizedByUser("admin");
+        $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 }

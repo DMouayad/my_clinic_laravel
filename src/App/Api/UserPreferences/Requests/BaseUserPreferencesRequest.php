@@ -8,8 +8,6 @@ use Illuminate\Foundation\Http\FormRequest;
 
 abstract class BaseUserPreferencesRequest extends FormRequest
 {
-    protected $stopOnFirstFailure = true;
-
     public function rules()
     {
         return [

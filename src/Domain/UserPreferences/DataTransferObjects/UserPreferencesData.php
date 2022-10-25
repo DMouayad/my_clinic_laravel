@@ -5,25 +5,33 @@ namespace Domain\UserPreferences\DataTransferObjects;
 class UserPreferencesData
 {
     private function __construct(
+        readonly ?int $user_id,
         readonly ?string $theme,
-        readonly ?string $locale,
-        readonly ?int $user_id
+        readonly ?string $locale
     ) {
     }
 
     public static function forCreate(
+        int $user_id,
         string $theme,
-        string $locale,
-        int $user_id
+        string $locale
     ): self {
-        return new UserPreferencesData($theme, $locale, $user_id);
+        return new UserPreferencesData(
+            user_id: $user_id,
+            theme: $theme,
+            locale: $locale
+        );
     }
 
     public static function forUpdate(
+        int $user_id,
         ?string $theme = null,
-        ?string $locale = null,
-        ?int $user_id = null
+        ?string $locale = null
     ): self {
-        return new UserPreferencesData($theme, $locale, $user_id);
+        return new UserPreferencesData(
+            user_id: $user_id,
+            theme: $theme,
+            locale: $locale
+        );
     }
 }

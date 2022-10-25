@@ -26,12 +26,11 @@ class EnsureStaffMemberEmailProvided
             "email" => "required|email",
         ])["email"];
 
-        $staff_member = StaffMember::where(
+        $staff_member_exists = StaffMember::where(
             "email",
-            $email_to_register
-        )->first();
-
-        if ($staff_member) {
+            strtolower($email_to_register)
+        )->exists();
+        if ($staff_member_exists) {
             return $next($request);
         } else {
             throw new EmailUnauthorizedToRegisterException($email_to_register);

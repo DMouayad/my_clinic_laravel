@@ -2,10 +2,16 @@
 
 namespace Support\Factories;
 
+use Faker\Factory;
+use Faker\Generator;
 use Illuminate\Database\Eloquent\Collection;
 
 abstract class BaseFactory
 {
+    private Generator $faker;
+
+    abstract static function new();
+
     public function times(int $times): Collection
     {
         return collect()
@@ -14,4 +20,14 @@ abstract class BaseFactory
     }
 
     abstract public function create();
+
+    public function createWithNullAttributes()
+    {
+    }
+
+    public function faker(): Generator
+    {
+        $this->faker ??= Factory::create();
+        return $this->faker;
+    }
 }

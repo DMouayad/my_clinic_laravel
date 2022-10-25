@@ -3,8 +3,11 @@
 namespace Tests\Feature\Api\Admin\StaffMember;
 
 use Domain\StaffMembers\Exceptions\DeletingOnlyAdminStaffMemberException;
+use Domain\StaffMembers\Models\StaffMember;
+use Domain\Users\Models\Role;
 use Illuminate\Routing\Exceptions\UrlGenerationException;
 use Illuminate\Testing\Fluent\AssertableJson;
+use Support\Helpers\ClassNameStringifier;
 use Symfony\Component\HttpFoundation\Response;
 
 class DeleteStaffMemberTest extends BaseStaffMemberApiRequestTest
@@ -21,21 +24,35 @@ class DeleteStaffMemberTest extends BaseStaffMemberApiRequestTest
 
     public function test_request_by_unauthorized_user_returns_error_response()
     {
-        $this->setRouteParameters(["staff_member" => 2]);
+        $this->setRouteParameters([
+            "staff_member" => $this->get_id_of_non_admin_staff_member(),
+        ]);
 
         parent::test_request_by_unauthorized_user_returns_error_response();
     }
 
+    private function get_id_of_non_admin_staff_member(): int
+    {
+        return StaffMember::query()
+            ->whereNot("role_id", Role::getIdWhereSlug("admin"))
+            ->first(["id"])->id;
+    }
+
     public function test_unauthorized_request_returns_error_response()
     {
-        $this->setRouteParameters(["staff_member" => 2]);
+        $this->setRouteParameters([
+            "staff_member" => $this->get_id_of_non_admin_staff_member(),
+        ]);
 
         parent::test_unauthorized_request_returns_error_response();
     }
 
     public function test_authorized_request_returns_success_response()
     {
-        $this->setRouteParameters(["staff_member" => 2]);
+        $this->setRouteParameters([
+            "staff_member" => $this->get_id_of_non_admin_staff_member(),
+        ]);
+
         $response = $this->makeRequestAuthorizedByUser("admin");
         $response->assertStatus(Response::HTTP_NO_CONTENT);
     }
@@ -66,17 +83,28 @@ class DeleteStaffMemberTest extends BaseStaffMemberApiRequestTest
     public function test_deleting_the_only_admin_staffMember_returns_exception()
     {
         // add the id of to-be-deleted StaffMember as a parameter in request url
-        $this->setRouteParameters(["staff_member" => 1]);
-
+        $this->setRouteParameters([
+            "staff_member" => $this->get_id_of_an_admin_staff_member(),
+        ]);
         $response = $this->makeRequestAuthorizedByUser("admin");
+
         $response->assertStatus(Response::HTTP_CONFLICT)->assertJson(
             fn(AssertableJson $json) => $json
                 ->where("status", Response::HTTP_CONFLICT)
                 ->where(
                     "error.exception",
-                    DeletingOnlyAdminStaffMemberException::className()
+                    ClassNameStringifier::getClassName(
+                        DeletingOnlyAdminStaffMemberException::class
+                    )
                 )
                 ->etc()
         );
+    }
+
+    private function get_id_of_an_admin_staff_member(): int
+    {
+        return StaffMember::query()
+            ->where("role_id", Role::getIdWhereSlug("admin"))
+            ->first(["id"])->id;
     }
 }

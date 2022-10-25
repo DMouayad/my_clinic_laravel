@@ -20,22 +20,17 @@ class GetStaffMembersWithoutRolesTest extends BaseStaffMemberApiRequestTest
     public function test_authorized_request_returns_success_response()
     {
         $response = $this->makeRequestAuthorizedByUser("admin");
-        $seeded_staff_members_count = config(
-            "my_clinic.seeded_staff_members_count"
-        );
 
         $response->assertJson(
             fn(AssertableJson $json) => $json
                 ->where("status", Response::HTTP_OK)
                 ->where("error", null)
                 ->has(
-                    "data",
-                    $seeded_staff_members_count,
+                    "data.0",
                     fn($json) => $json
                         ->missing("role")
                         ->hasAll(["id", "email", "created_at"])
                 )
-                ->where("meta.total", $seeded_staff_members_count)
                 ->etc()
         );
     }

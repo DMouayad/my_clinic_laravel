@@ -70,6 +70,7 @@ class StaffMemberController extends Controller
     /**
      * @throws \App\Exceptions\FailedToSaveObjectException
      * @throws \Domain\Users\Exceptions\RoleNotFoundException
+     * @throws \Domain\StaffMembers\Exceptions\StaffMemberAlreadyExistsException
      */
     public function store(
         AddStaffMemberRequest $request,
@@ -88,6 +89,7 @@ class StaffMemberController extends Controller
     /**
      * @throws \App\Exceptions\FailedToUpdateObjectException
      * @throws \Domain\Users\Exceptions\UserDoesntMatchHisStaffMemberException
+     * @throws \Domain\StaffMembers\Exceptions\StaffMemberAlreadyExistsException
      */
     public function update(
         UpdateStaffMemberRequest $request,

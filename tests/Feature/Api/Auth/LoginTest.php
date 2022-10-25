@@ -8,6 +8,7 @@ use Database\Seeders\Utils\UserSeedingData;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Illuminate\Testing\Fluent\AssertableJson;
+use Support\Helpers\ClassNameStringifier;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\Utils\CustomTestCases\BaseApiRequestTestCase;
 
@@ -104,7 +105,9 @@ class LoginTest extends BaseApiRequestTestCase
             fn(AssertableJson $json) => $json
                 ->where(
                     "error.exception",
-                    InvalidEmailCredentialException::className()
+                    ClassNameStringifier::getClassName(
+                        InvalidEmailCredentialException::class
+                    )
                 )
                 ->where("status", Response::HTTP_UNAUTHORIZED)
                 ->etc()
@@ -114,14 +117,15 @@ class LoginTest extends BaseApiRequestTestCase
     function test_request_with_missing_data_returns_exception()
     {
         $response = $this->makeRequest();
-
         $response
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJson(
                 fn(AssertableJson $json) => $json
                     ->where(
                         "error.exception",
-                        CustomValidationException::className()
+                        ClassNameStringifier::getClassName(
+                            CustomValidationException::class
+                        )
                     )
                     ->has(
                         "error.description",

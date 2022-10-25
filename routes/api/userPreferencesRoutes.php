@@ -6,7 +6,7 @@ use App\Api\UserPreferences\Controllers\UserPreferencesController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(["auth:sanctum"])
-    ->name("user.preferences.")
+    ->name("my_preferences.")
     ->controller(UserPreferencesController::class)
     ->group(function () {
         Route::get("me/preferences", "show")->name("get");

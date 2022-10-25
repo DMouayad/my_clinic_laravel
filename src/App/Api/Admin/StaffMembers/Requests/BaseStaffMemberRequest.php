@@ -11,7 +11,6 @@ use Support\Helpers\ValidatorHelper;
 
 abstract class BaseStaffMemberRequest extends FormRequest
 {
-    protected $stopOnFirstFailure = true;
 
     public function rules()
     {
