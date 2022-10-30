@@ -12,20 +12,20 @@ class WasVerified extends Verified implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets;
 
-    public function broadcastOn()
-    {
-        return new PrivateChannel("notifications.user." . $this->user->id);
-    }
-
     public function broadcastAs(): string
     {
-        return "private-email-was-verified";
+        return "email-was-verified";
+    }
+
+    public function broadcastOn()
+    {
+        return new PrivateChannel("users." . $this->user->id);
     }
 
     public function broadcastWith()
     {
         return [
-            "id" => $this->user->id,
+            "user_id" => $this->user->id,
             "email_verified_at" => $this->user->email_verified_at,
         ];
     }
