@@ -6,12 +6,21 @@ use App\Api\Admin\StaffMembers\Queries\StaffMembersIndexQuery;
 use App\Api\Admin\StaffMembers\Requests\AddStaffMemberRequest;
 use App\Api\Admin\StaffMembers\Requests\UpdateStaffMemberRequest;
 use App\Api\Admin\StaffMembers\Resources\StaffMemberResource;
+use App\Exceptions\EmailAlreadyRegisteredException;
+use App\Exceptions\FailedToDeleteObjectException;
+use App\Exceptions\FailedToSaveObjectException;
+use App\Exceptions\FailedToUpdateObjectException;
+use App\Exceptions\UnauthorizedToDeleteUserException;
 use App\Http\Controllers\Controller;
 use Domain\StaffMembers\Actions\AddStaffMemberAction;
 use Domain\StaffMembers\Actions\DeleteStaffMemberAction;
 use Domain\StaffMembers\Actions\UpdateStaffMemberAction;
 use Domain\StaffMembers\DataTransferObjects\StaffMemberData;
+use Domain\StaffMembers\Exceptions\DeletingOnlyAdminStaffMemberException;
+use Domain\StaffMembers\Exceptions\StaffMemberAlreadyExistsException;
 use Domain\StaffMembers\Models\StaffMember;
+use Domain\Users\Exceptions\RoleNotFoundException;
+use Domain\Users\Exceptions\UserDoesntMatchHisStaffMemberException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -29,8 +38,42 @@ class StaffMemberController extends Controller
     }
 
     /**
-     * @param \App\Api\Admin\StaffMembers\Queries\StaffMembersIndexQuery $query
-     * @param \Illuminate\Http\Request $request
+     * @throws RoleNotFoundException
+     * @throws FailedToDeleteObjectException
+     * @throws UnauthorizedToDeleteUserException
+     * @throws DeletingOnlyAdminStaffMemberException
+     */
+    public function destroy(
+        Request $request,
+        StaffMember $staff_member,
+        DeleteStaffMemberAction $action
+    ): JsonResponse {
+        $action->execute(
+            staff_member: $staff_member,
+            request_user: $request->user()
+        );
+
+        return $this->successResponse(status_code: Response::HTTP_NO_CONTENT);
+    }
+
+    /**
+     * Get a list of the staff Emails without
+     * loading their role relationship.
+     */
+    public function index(
+        StaffMembersIndexQuery $query,
+        Request $request
+    ): JsonResource {
+        return $this->paginatedResourceCollection(
+            $query,
+            per_page: $request->get("per_page")
+        );
+    }
+
+    /**
+     * @param  StaffMembersIndexQuery  $query
+     * @param  Request  $request
+     *
      * @return JsonResource|null
      */
     public function indexWithRoles(
@@ -54,23 +97,9 @@ class StaffMemberController extends Controller
     }
 
     /**
-     * Get a list of the staff Emails without
-     * loading their role relationship.
-     */
-    public function index(
-        StaffMembersIndexQuery $query,
-        Request $request
-    ): JsonResource {
-        return $this->paginatedResourceCollection(
-            $query,
-            per_page: $request->get("per_page")
-        );
-    }
-
-    /**
-     * @throws \App\Exceptions\FailedToSaveObjectException
-     * @throws \Domain\Users\Exceptions\RoleNotFoundException
-     * @throws \Domain\StaffMembers\Exceptions\StaffMemberAlreadyExistsException
+     * @throws FailedToSaveObjectException
+     * @throws RoleNotFoundException
+     * @throws StaffMemberAlreadyExistsException
      */
     public function store(
         AddStaffMemberRequest $request,
@@ -87,9 +116,11 @@ class StaffMemberController extends Controller
     }
 
     /**
-     * @throws \App\Exceptions\FailedToUpdateObjectException
-     * @throws \Domain\Users\Exceptions\UserDoesntMatchHisStaffMemberException
-     * @throws \Domain\StaffMembers\Exceptions\StaffMemberAlreadyExistsException
+     * @throws FailedToUpdateObjectException
+     * @throws RoleNotFoundException
+     * @throws StaffMemberAlreadyExistsException
+     * @throws UserDoesntMatchHisStaffMemberException
+     * @throws EmailAlreadyRegisteredException
      */
     public function update(
         UpdateStaffMemberRequest $request,
@@ -101,22 +132,6 @@ class StaffMemberController extends Controller
             $staff_member,
             StaffMemberData::forUpdate(...$validated)
         );
-        return $this->successResponse(status_code: Response::HTTP_NO_CONTENT);
-    }
-
-    /**
-     * @throws \Domain\Users\Exceptions\RoleNotFoundException
-     * @throws \App\Exceptions\FailedToDeleteObjectException
-     * @throws \App\Exceptions\UnauthorizedToDeleteUserException
-     * @throws \Domain\StaffMembers\Exceptions\DeletingOnlyAdminStaffMemberException
-     */
-    public function destroy(
-        Request $request,
-        StaffMember $staff_member,
-        DeleteStaffMemberAction $action
-    ): JsonResponse {
-        $action->execute($staff_member, $request->user());
-
         return $this->successResponse(status_code: Response::HTTP_NO_CONTENT);
     }
 }
