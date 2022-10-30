@@ -3,10 +3,13 @@
 namespace Domain\StaffMembers\Actions;
 
 use App\Exceptions\FailedToDeleteObjectException;
+use App\Exceptions\UnauthorizedToDeleteUserException;
 use App\Models\User;
 use Domain\StaffMembers\Exceptions\DeletingOnlyAdminStaffMemberException;
 use Domain\StaffMembers\Models\StaffMember;
 use Domain\Users\Actions\DeleteUserAction;
+use Domain\Users\Events\UserWasDeleted;
+use Domain\Users\Exceptions\RoleNotFoundException;
 use Domain\Users\Models\Role;
 
 class DeleteStaffMemberAction
@@ -17,10 +20,10 @@ class DeleteStaffMemberAction
     }
 
     /**
-     * @throws \Domain\Users\Exceptions\RoleNotFoundException
-     * @throws \App\Exceptions\FailedToDeleteObjectException
-     * @throws \App\Exceptions\UnauthorizedToDeleteUserException
-     * @throws \Domain\StaffMembers\Exceptions\DeletingOnlyAdminStaffMemberException
+     * @throws RoleNotFoundException
+     * @throws FailedToDeleteObjectException
+     * @throws UnauthorizedToDeleteUserException
+     * @throws DeletingOnlyAdminStaffMemberException
      */
     public function execute(StaffMember $staff_member, User $request_user): bool
     {
@@ -30,6 +33,7 @@ class DeleteStaffMemberAction
                 $staff_member->user,
                 $request_user
             );
+            event(new UserWasDeleted($staff_member->user));
         }
         if (!$staff_member->delete()) {
             throw new FailedToDeleteObjectException(StaffMember::class);
@@ -40,10 +44,11 @@ class DeleteStaffMemberAction
     /**
      * Check if [staff_member] can be deleted in case of a staffMember with admin role.
      *
-     * @param StaffMember $staff_member
+     * @param  StaffMember  $staff_member
+     *
      * @return void
-     * @throws \Domain\StaffMembers\Exceptions\DeletingOnlyAdminStaffMemberException
-     * @throws \Domain\Users\Exceptions\RoleNotFoundException
+     * @throws DeletingOnlyAdminStaffMemberException
+     * @throws RoleNotFoundException
      */
     private function checkCanBeDeletedIfIsAdmin(StaffMember $staff_member): void
     {
