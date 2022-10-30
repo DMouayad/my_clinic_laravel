@@ -2,19 +2,23 @@
 
 namespace Domain\Users\Events;
 
-use Illuminate\Auth\Events\Verified;
+use App\Models\User;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 
-class WasVerified extends Verified implements ShouldBroadcast
+class UserWasDeleted implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets;
 
+    public function __construct(readonly User $user)
+    {
+    }
+
     public function broadcastAs(): string
     {
-        return "email-was-verified";
+        return "user-was-deleted";
     }
 
     public function broadcastOn()
@@ -26,7 +30,7 @@ class WasVerified extends Verified implements ShouldBroadcast
     {
         return [
             "user_id" => $this->user->id,
-            "email_verified_at" => $this->user->email_verified_at,
+            "deleted_at" => now(),
         ];
     }
 }

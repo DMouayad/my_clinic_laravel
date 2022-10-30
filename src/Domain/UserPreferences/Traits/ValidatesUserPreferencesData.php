@@ -44,8 +44,9 @@ trait ValidatesUserPreferencesData
             config("my_clinic.supported_theme_modes")
         );
         if (
-            (!$theme && $required) ||
-            !in_array(strtolower($theme), $supported_themes)
+            $required &&
+            (is_null($theme) ||
+                !in_array(strtolower($theme), $supported_themes))
         ) {
             throw new ProvidedThemePreferenceNotValidException($theme);
         }
@@ -58,8 +59,9 @@ trait ValidatesUserPreferencesData
             config("my_clinic.supported_locales")
         );
         if (
-            (!$locale && $required) ||
-            !in_array(strtolower($locale), $supported_locales)
+            $required &&
+            (is_null($locale) ||
+                !in_array(strtolower($locale), $supported_locales))
         ) {
             throw new ProvidedLocalePreferenceNotValidException($locale);
         }
