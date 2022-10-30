@@ -4,10 +4,14 @@ namespace App\Api\Users\Controllers;
 
 use App\Api\Users\Requests\UpdateUserRequest;
 use App\Api\Users\Resources\UserResource;
+use App\Exceptions\FailedToDeleteObjectException;
+use App\Exceptions\UnauthorizedToDeleteUserException;
 use App\Http\Controllers\Controller;
 use Domain\Users\Actions\DeleteUserAction;
 use Domain\Users\Actions\UpdateUserAction;
-use Domain\Users\DataTransferObjects\UserData;
+use Domain\Users\DataTransferObjects\UpdateUserData;
+use Domain\Users\Events\UserWasDeleted;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Support\Traits\ProvidesApiJsonResponse;
@@ -26,17 +30,21 @@ class UserController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @throws \App\Exceptions\FailedToDeleteObjectException
-     * @throws \App\Exceptions\UnauthorizedToDeleteUserException
+     * @throws FailedToDeleteObjectException
+     * @throws UnauthorizedToDeleteUserException
      */
-    public function destroy(Request $request, DeleteUserAction $action)
-    {
+    public function deleteCurrentUser(
+        Request $request,
+        DeleteUserAction $action
+    ): JsonResponse {
         $action->execute($request->user(), $request->user());
+        event(new UserWasDeleted($request->user()));
         return $this->successResponse(status_code: Response::HTTP_NO_CONTENT);
     }
 
     /**
-     * @param Request $request
+     * @param  Request  $request
+     *
      * @return JsonResource|null
      */
     public function show(Request $request): ?JsonResource
@@ -54,7 +62,7 @@ class UserController extends Controller
     public function update(UpdateUserRequest $request, UpdateUserAction $action)
     {
         $validated = $request->validated();
-        $action->execute($request->user(), UserData::forUpdate(...$validated));
+        $action->execute($request->user(), new UpdateUserData(...$validated));
         return $this->successResponse(status_code: Response::HTTP_NO_CONTENT);
     }
 }
